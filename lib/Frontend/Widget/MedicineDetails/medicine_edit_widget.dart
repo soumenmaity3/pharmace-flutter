@@ -1225,27 +1225,47 @@ class _MedicineEditWidgetState extends ConsumerState<MedicineEditWidget>
             ),
             child: Column(
               children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    'Enable Loose Sales',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
+                // SwitchListTile(
+                //   contentPadding: EdgeInsets.zero,
+                //   title: Text(
+                //     'Enable Loose Sales',
+                //     style: theme.textTheme.titleSmall?.copyWith(
+                //       fontWeight: FontWeight.w700,
+                //     ),
+                //   ),
+                //   subtitle: Text(
+                //     'Allows selling individual tablets broken from strip',
+                //     style: theme.textTheme.bodySmall?.copyWith(
+                //       color: isDark
+                //           ? AppColors.darkTextTertiary
+                //           : AppColors.lightTextTertiary,
+                //     ),
+                //   ),
+                //   value: _isLooseAvailable,
+                //   activeTrackColor: AppColors.primary,
+                //   onChanged: (val) {
+                //     setState(() => _isLooseAvailable = val);
+                //   },
+                // ),
+                Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  child: SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('Enable Loose Sales'),
+                    subtitle: Text('Allows selling individual tablets broken from strip',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextTertiary
+                            : AppColors.lightTextTertiary,
+                      ),
                     ),
+                    value: _isLooseAvailable,
+                    activeTrackColor: AppColors.primary,
+                    onChanged: (val) {
+                      setState(() => _isLooseAvailable = val);
+                    },
                   ),
-                  subtitle: Text(
-                    'Allows selling individual tablets broken from strip',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextTertiary
-                          : AppColors.lightTextTertiary,
-                    ),
-                  ),
-                  value: _isLooseAvailable,
-                  activeTrackColor: AppColors.primary,
-                  onChanged: (val) {
-                    setState(() => _isLooseAvailable = val);
-                  },
                 ),
                 if (_isLooseAvailable) ...[
                   const Divider(height: 24),

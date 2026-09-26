@@ -37,8 +37,6 @@ class ApiService {
     'Content-Type': 'application/json',
   };
 
-  ///---------------owner--------------
-  /// Signup shop owner
   Future<ApiResponse<OwnerSignUpReturnModel>> signUpOwner(
     ShopOwnerModel owner,
   ) async {
@@ -76,7 +74,6 @@ class ApiService {
     );
   }
 
-  ///Login or Sign in shop owner
   Future<ApiResponse<SignInReturn>> signInOwner(
     Map<String, String> loginDetails,
   ) async {
@@ -112,7 +109,6 @@ class ApiService {
     );
   }
 
-  ///get-owner-shop
   Future<ApiResponse<List<ShopReturnModel>>> getOwnerShops() async {
     try {
       final token = await getToken();

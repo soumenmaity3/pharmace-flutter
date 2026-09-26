@@ -19,6 +19,7 @@ import 'package:pharmace/Provider/owner_provider.dart';
 import 'package:pharmace/Provider/recent_sales_provider.dart';
 import 'package:pharmace/Provider/shop_provider.dart';
 import 'package:pharmace/LocalDB/database.dart';
+import 'package:pharmace/Frontend/Profile/screens/notification_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -283,6 +284,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               },
                             );
                           },
+                        ),
+                        const SizedBox(width: 8),
+                        Material(
+                          color: theme.cardTheme.color ?? theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const NotificationScreen(),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.grey.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Icon(
+                                    Icons.notifications_outlined,
+                                    size: 20,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                  Positioned(
+                                    right: -1,
+                                    top: -1,
+                                    child: Container(
+                                      width: 7,
+                                      height: 7,
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.error,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),

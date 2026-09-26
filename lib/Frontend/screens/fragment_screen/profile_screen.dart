@@ -8,6 +8,8 @@ import 'package:pharmace/Frontend/screens/auth_screens/add_shop_screen.dart';
 import 'package:pharmace/Frontend/theme/app_theme_extension.dart';
 import 'package:pharmace/Provider/shop_provider.dart';
 
+import 'package:pharmace/Frontend/Profile/screens/notification_screen.dart';
+
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key, required this.onLogout});
   final VoidCallback onLogout;
@@ -97,6 +99,10 @@ class ProfileScreen extends ConsumerWidget {
           Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (_) => AccountAndSettingsScreen()));
+        } else if (value == 'notifications') {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const NotificationScreen()));
         }
       },
       itemBuilder: (context) => const [

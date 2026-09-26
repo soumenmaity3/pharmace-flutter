@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pharmace/Backend/model/Input/shop_owner_model.dart';
+import 'package:pharmace/Frontend/Profile/screens/notification_screen.dart';
 import 'package:pharmace/Frontend/theme/app_theme_extension.dart';
 import 'package:pharmace/Provider/owner_provider.dart';
 
@@ -91,7 +92,13 @@ class AccountAndSettingsScreen extends ConsumerWidget {
                       subtitle: 'Push, alerts, reminders',
                       iconBgColor: colors.primaryContainer,
                       iconColor: colors.primary,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationScreen(),
+                          ),
+                        );
+                      },
                     ),
                     _SettingsTile(
                       icon: Icons.dark_mode_outlined,

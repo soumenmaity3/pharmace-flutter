@@ -168,7 +168,11 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
+                                    Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      spacing: 8,
+                                      runSpacing: 4,
                                       children: [
                                         Text(
                                           'Mark as self employee',
@@ -177,7 +181,6 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                                                 fontWeight: FontWeight.w600,
                                               ),
                                         ),
-                                        const SizedBox(width: 8),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 6,
@@ -197,7 +200,7 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                                           ),
                                           child: Text(
                                             isAlreadyOwnerEmployee
-                                                ? 'Already Registered'
+                                                ? 'Already registered'
                                                 : 'Owner',
                                             style: TextStyle(
                                               fontSize: 10,
