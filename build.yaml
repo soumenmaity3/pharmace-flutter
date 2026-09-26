@@ -1,0 +1,12 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        generate_for:
+          - lib/LocalDB/**
+      drift_dev:preparing_builder:
+        generate_for:
+          - lib/LocalDB/**
+      source_gen:combining_builder:
+        generate_for:
+          - lib/LocalDB/**
