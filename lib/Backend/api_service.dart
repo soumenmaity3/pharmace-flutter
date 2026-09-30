@@ -5,6 +5,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:pharmace/Backend/auth/secure_storage_service.dart';
 import 'package:pharmace/Backend/model/Input/medicine_input_model.dart';
 import 'package:pharmace/Backend/model/Input/shop_model.dart';
+import 'package:pharmace/Backend/model/Output/employee_return_model.dart';
 import 'package:pharmace/Backend/model/Output/medicine_output_model.dart';
 import 'package:pharmace/Backend/model/Output/shop_return_model.dart';
 import 'package:pharmace/Backend/model/api_response.dart';
@@ -636,6 +637,67 @@ class ApiService {
         statusCode: response.statusCode,
         data: response.statusCode >= 200 && response.statusCode < 300
             ? medicine
+            : null,
+        message: message,
+      );
+    } catch (e) {
+      return ApiResponse(statusCode: 500, data: null, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<List<EmployeeOutputModel>>> getAllEployee(
+    String shopId,
+  ) async {
+    try {
+      final token = await getToken();
+      if (token == null || token.isEmpty) {
+        return ApiResponse(
+          statusCode: 401,
+          data: null,
+          message: 'Token is not valid',
+        );
+      }
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/empe/get-all/$shopId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(Duration(seconds: 15));
+      List<EmployeeReturnModel>? allEmployee;
+      String? message;
+      if (response.body.trim().isNotEmpty) {
+        try {
+          final decode = jsonDecode(response.body);
+          if (decode is List) {
+            allEmployee = EmployeeReturnModel.fromJsonList(decode);
+          } else if (decode is Map<String, dynamic>) {
+            message =
+                decode['message']?.toString() ??
+                decode['error']?.toString() ??
+                decode['detail']?.toString();
+
+            final rawList =
+                decode['content'] ??
+                decode['data'] ??
+                decode['items'] ??
+                decode['employee'];
+            if (rawList is List) {
+              allEmployee = EmployeeReturnModel.fromJsonList(rawList);
+            }
+          } else {
+            message = decode.toString();
+          }
+        } on FormatException {
+          message = response.body.trim();
+        }
+      }
+      return ApiResponse<List<EmployeeReturnModel>>(
+        statusCode: response.statusCode,
+        data: response.statusCode >= 200 && response.statusCode < 300
+            ? allEmployee
             : null,
         message: message,
       );

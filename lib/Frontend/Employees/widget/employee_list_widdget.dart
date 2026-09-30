@@ -5,8 +5,8 @@ import 'package:pharmace/Frontend/theme/app_colors.dart';
 import 'package:pharmace/Provider/employee_provider.dart';
 import 'package:pharmace/Provider/owner_provider.dart';
 
-class EmployeeListWiddget extends ConsumerWidget {
-  const EmployeeListWiddget({super.key, required this.employeeId, this.onTap});
+class EmployeeListWidget extends ConsumerWidget {
+  const EmployeeListWidget({super.key, required this.employeeId, this.onTap});
 
   final String employeeId;
   final VoidCallback? onTap;

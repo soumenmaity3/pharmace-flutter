@@ -512,7 +512,7 @@ class EmployeesScreen extends ConsumerWidget {
         itemCount: allEmployee.length,
         itemBuilder: (context, index) {
           final employee = allEmployee[index];
-          return EmployeeListWiddget(
+          return EmployeeListWidget(
             employeeId: employee.id,
             onTap: () {
               Navigator.of(context).push(

@@ -9,7 +9,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '28.4K',
     sales: 34,
     rating: 4.8,
-    role: Role.manager, id: '09921',
+    role: Role.manager,
+    id: '09921',
   ),
   EmployeeModel(
     name: 'Priya Sharma',
@@ -19,7 +20,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '19.2K',
     sales: 27,
     rating: 4.7,
-    role: Role.pharmacist,id: '09922',
+    role: Role.pharmacist,
+    id: '09922',
   ),
   EmployeeModel(
     name: 'Rahul Banerjee',
@@ -29,7 +31,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '22.6K',
     sales: 31,
     rating: 4.6,
-    role: Role.cashier,id: '09923',
+    role: Role.cashier,
+    id: '09923',
   ),
   EmployeeModel(
     name: 'Debasish Pal',
@@ -39,7 +42,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '16.8K',
     sales: 21,
     rating: 4.5,
-    role: Role.pharmacist,id: '09924',
+    role: Role.pharmacist,
+    id: '09924',
   ),
   EmployeeModel(
     name: 'Sneha Roy',
@@ -49,7 +53,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '9.4K',
     sales: 14,
     rating: 4.4,
-    role: Role.staff,id: '09925',
+    role: Role.staff,
+    id: '09925',
   ),
   EmployeeModel(
     name: 'Tanmoy Dutta',
@@ -59,7 +64,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '7.1K',
     sales: 11,
     rating: 4.3,
-    role: Role.cashier,id: '09926',
+    role: Role.cashier,
+    id: '09926',
   ),
   EmployeeModel(
     name: 'Ritika Sen',
@@ -91,7 +97,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '19.2K',
     sales: 27,
     rating: 4.7,
-    role: Role.pharmacist,id: '09929',
+    role: Role.pharmacist,
+    id: '09929',
   ),
   EmployeeModel(
     name: 'Rahul Banerjee',
@@ -101,7 +108,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '22.6K',
     sales: 31,
     rating: 4.6,
-    role: Role.cashier,id: '09930',
+    role: Role.cashier,
+    id: '09930',
   ),
   EmployeeModel(
     name: 'Debasish Pal',
@@ -111,7 +119,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '16.8K',
     sales: 21,
     rating: 4.5,
-    role: Role.pharmacist,id: '09931',
+    role: Role.pharmacist,
+    id: '09931',
   ),
   EmployeeModel(
     name: 'Sneha Roy',
@@ -121,7 +130,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '9.4K',
     sales: 14,
     rating: 4.4,
-    role: Role.staff,id: '09932',
+    role: Role.staff,
+    id: '09932',
   ),
   EmployeeModel(
     name: 'Tanmoy Dutta',
@@ -131,7 +141,8 @@ final employeeData = <EmployeeModel>[
     revenueValue: '7.1K',
     sales: 11,
     rating: 4.3,
-    role: Role.cashier,id: '09933',
+    role: Role.cashier,
+    id: '09933',
   ),
   EmployeeModel(
     name: 'Ritika Sen',
@@ -141,6 +152,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '4.6K',
     sales: 7,
     rating: 4.5,
-    role: Role.cashier,id: '09934',
+    role: Role.cashier,
+    id: '09934',
   ),
 ];

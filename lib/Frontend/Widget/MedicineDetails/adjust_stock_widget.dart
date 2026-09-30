@@ -795,6 +795,7 @@ class _AdjustStockWidgetState extends ConsumerState<AdjustStockWidget> {
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
                     ),
+                    enabled: false,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 12),
