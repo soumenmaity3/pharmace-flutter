@@ -1,20 +1,73 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pharmace/Backend/model/Output/employee_return_model.dart';
+import 'package:pharmace/Backend/model/api_response.dart';
 import 'package:pharmace/Frontend/Employees/data/employee_data.dart';
 import 'package:pharmace/Frontend/Employees/model/employee_model.dart';
+import 'package:pharmace/LocalDB/database.dart';
+import 'package:pharmace/Provider/database_provider.dart';
+import 'package:pharmace/Provider/shop_provider.dart';
+
+import '../Backend/api_service.dart';
 
 final employeeProvider = StateNotifierProvider((ref) {
-  return _EmployeeNotifier();
+  final currentShopId = ref.watch(selectedShopProvider)?.id;
+  final db = ref.watch(databaseProvider);
+  return _EmployeeNotifier(db, currentShopId);
 });
 
 class _EmployeeNotifier extends StateNotifier<_EmployeeState> {
-  _EmployeeNotifier()
-    : super(
-        _EmployeeState(
-          allEmployee: employeeData,
-          filteredEmployee: employeeData,
-          search: '',
-        ),
+  AppDatabase db;
+
+  String? currentShopId;
+
+  _EmployeeNotifier(this.db, this.currentShopId)
+    : super(_EmployeeState(allEmployee: [], filteredEmployee: [], search: '')) {
+    if (currentShopId != null && currentShopId!.isNotEmpty) {
+      loadAllEmployee(currentShopId!);
+    }
+  }
+
+  Future<void> loadAllEmployee(String currentShopId) async {
+    final List<EmployeeTableData> employeesData = await db.employeeDao
+        .getAllEmployees(currentShopId);
+    final List<EmployeeModel> employees = employeesData.map((e) {
+      final role = Role.values.firstWhere(
+        (r) => r.name.toLowerCase() == e.role.toLowerCase(),
+        orElse: () => Role.staff,
       );
+
+      return EmployeeModel(
+        id: e.id,
+        name: e.name,
+        email: e.email,
+        phone: '',
+        joinDate: e.createdAt,
+        revenueValue: '0',
+        sales: 0,
+        rating: 0.0,
+        role: role,
+        isActive: true,
+      );
+    }).toList();
+    state = state.copyWith(allEmployee: employees, filteredEmployee: employees);
+  }
+
+  Future<ApiResponse<List<EmployeeReturnModel>>> fetchAndSyncFromBackend({
+    required String shopId,
+  }) async {
+    final response = await ApiService().getAllEmployee(shopId: shopId);
+    if (response.statusCode >= 200 &&
+        response.statusCode < 300 &&
+        response.data != null) {
+      await syncFromBackend(response.data!, shopId);
+    }
+    return response;
+  }
+  Future<void> syncFromBackend(List<EmployeeReturnModel> employees,String shopId)async {
+    await db.employeeDao.syncEmployees(employees, shopId);
+    await loadAllEmployee(shopId);
+
+  }
 
   void updateEmployee(EmployeeModel model) {
     final updateItem = state.allEmployee.map((item) {
@@ -124,6 +177,7 @@ class _EmployeeState {
     required this.filteredEmployee,
     required this.search,
   });
+
   _EmployeeState copyWith({
     List<EmployeeModel>? allEmployee,
     List<EmployeeModel>? filteredEmployee,

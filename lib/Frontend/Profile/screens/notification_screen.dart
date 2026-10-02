@@ -5,9 +5,6 @@ import 'package:pharmace/Frontend/theme/app_theme_extension.dart';
 import '../model/PharmacyNotification.dart';
 import '../widget/build_notification_card_widget.dart';
 
-
-
-
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -95,8 +92,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       PharmacyNotification(
         id: '4',
         title: 'Staff Shift Check-in: Priya Sen',
-        message:
-            'Pharmacist Priya Sen clocked in at 09:02 AM at Main Counter.',
+        message: 'Pharmacist Priya Sen clocked in at 09:02 AM at Main Counter.',
         category: NotificationCategory.staff,
         priority: NotificationPriority.info,
         timestamp: now.subtract(const Duration(hours: 5, minutes: 15)),
@@ -275,9 +271,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-
-
-
   void _showNotificationSettingsSheet() {
     final theme = Theme.of(context);
     final appColors = theme.extension<AppThemeExtension>()!;
@@ -292,8 +285,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
             return Container(
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               padding: EdgeInsets.fromLTRB(
                 20,
@@ -335,7 +329,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   const SizedBox(height: 10),
                   _buildSettingSwitch(
                     title: 'Low Stock Alerts',
-                    subtitle: 'Notify when medicine quantity drops below threshold',
+                    subtitle:
+                        'Notify when medicine quantity drops below threshold',
                     icon: Icons.inventory_2_outlined,
                     value: true,
                     onChanged: (val) {},
@@ -344,7 +339,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
                   _buildSettingSwitch(
                     title: 'Expiry Warnings',
-                    subtitle: 'Alert 30 and 15 days before batch expiration date',
+                    subtitle:
+                        'Alert 30 and 15 days before batch expiration date',
                     icon: Icons.warning_amber_rounded,
                     value: true,
                     onChanged: (val) {},
@@ -353,7 +349,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
                   _buildSettingSwitch(
                     title: 'Daily Sales & Cash Summaries',
-                    subtitle: 'Receive shift closing sales and settlement alerts',
+                    subtitle:
+                        'Receive shift closing sales and settlement alerts',
                     icon: Icons.receipt_long_outlined,
                     value: true,
                     onChanged: (val) {},
@@ -471,18 +468,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        // leading: Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Material(
-        //     color: theme.cardTheme.color ?? theme.colorScheme.surface,
-        //     borderRadius: BorderRadius.circular(12),
-        //     child: InkWell(
-        //       borderRadius: BorderRadius.circular(12),
-        //       onTap: () => Navigator.maybePop(context),
-        //       child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-        //     ),
-        //   ),
-        // ),
         title: Row(
           children: [
             const Text(
@@ -568,13 +553,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 value: 'clear_all',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_sweep_outlined,
-                        size: 18, color: AppColors.error),
-                    SizedBox(width: 10),
-                    Text(
-                      'Clear all',
-                      style: TextStyle(color: AppColors.error),
+                    Icon(
+                      Icons.delete_sweep_outlined,
+                      size: 18,
+                      color: AppColors.error,
                     ),
+                    SizedBox(width: 10),
+                    Text('Clear all', style: TextStyle(color: AppColors.error)),
                   ],
                 ),
               ),
@@ -586,7 +571,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Expandable Search Bar
             if (_isSearchExpanded)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -606,7 +590,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           )
                         : null,
                     filled: true,
-                    fillColor: theme.cardTheme.color ?? theme.colorScheme.surface,
+                    fillColor:
+                        theme.cardTheme.color ?? theme.colorScheme.surface,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 12,
@@ -634,8 +619,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   },
                 ),
               ),
-
-            // Horizontal Filter Chips
             Container(
               height: 48,
               margin: const EdgeInsets.symmetric(vertical: 6),
@@ -688,10 +671,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 4),
-
-            // List of Notifications or Empty State
             Expanded(
               child: filtered.isEmpty
                   ? _buildEmptyState(theme, appColors)
@@ -715,7 +695,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             item: item,
                             theme: theme,
                             appColors: appColors,
+                            // Use named parameter as defined in widget class
                             notifications: _notifications,
+                            onDelete: () {
+                              setState(() {
+                                // Just call setState to rebuild. The item is 
+                                // already removed by child's logic.
+                              });
+                            },
                           );
                         },
                       ),
@@ -763,7 +750,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       color: primary.withValues(alpha: 0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
-                    )
+                    ),
                   ]
                 : null,
           ),
@@ -774,7 +761,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 Icon(
                   icon,
                   size: 14,
-                  color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                  color: isSelected
+                      ? Colors.white
+                      : theme.colorScheme.onSurface,
                 ),
                 const SizedBox(width: 6),
               ],
@@ -783,14 +772,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                  color: isSelected
+                      ? Colors.white
+                      : theme.colorScheme.onSurface,
                 ),
               ),
               if (count != null && count > 0) ...[
                 const SizedBox(width: 6),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 1.5,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Colors.white.withValues(alpha: 0.25)
@@ -813,16 +806,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
     );
   }
-
-  // Widget _buildNotificationCard({
-  //   required PharmacyNotification item,
-  //   required ThemeData theme,
-  //   required AppThemeExtension appColors,
-  // }) {
-  //   return
-  // }
-
-
 
   Widget _buildEmptyState(ThemeData theme, AppThemeExtension appColors) {
     return Center(
@@ -891,6 +874,4 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
     );
   }
-
-
 }

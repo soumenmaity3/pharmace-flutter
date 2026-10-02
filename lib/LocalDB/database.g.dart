@@ -3985,6 +3985,461 @@ class ShopTableCompanion extends UpdateCompanion<ShopTableData> {
   }
 }
 
+class $EmployeeTableTable extends EmployeeTable
+    with TableInfo<$EmployeeTableTable, EmployeeTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EmployeeTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Manager'),
+  );
+  static const VerificationMeta _isFromOwnerMeta = const VerificationMeta(
+    'isFromOwner',
+  );
+  @override
+  late final GeneratedColumn<bool> isFromOwner = GeneratedColumn<bool>(
+    'is_from_owner',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_from_owner" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _shopIdMeta = const VerificationMeta('shopId');
+  @override
+  late final GeneratedColumn<String> shopId = GeneratedColumn<String>(
+    'shop_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    email,
+    role,
+    isFromOwner,
+    shopId,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'employee_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EmployeeTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_emailMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    }
+    if (data.containsKey('is_from_owner')) {
+      context.handle(
+        _isFromOwnerMeta,
+        isFromOwner.isAcceptableOrUnknown(
+          data['is_from_owner']!,
+          _isFromOwnerMeta,
+        ),
+      );
+    }
+    if (data.containsKey('shop_id')) {
+      context.handle(
+        _shopIdMeta,
+        shopId.isAcceptableOrUnknown(data['shop_id']!, _shopIdMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EmployeeTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EmployeeTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      isFromOwner: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_from_owner'],
+      )!,
+      shopId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shop_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $EmployeeTableTable createAlias(String alias) {
+    return $EmployeeTableTable(attachedDatabase, alias);
+  }
+}
+
+class EmployeeTableData extends DataClass
+    implements Insertable<EmployeeTableData> {
+  final String id;
+  final String name;
+  final String email;
+  final String role;
+  final bool isFromOwner;
+  final String? shopId;
+  final String createdAt;
+  const EmployeeTableData({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.role,
+    required this.isFromOwner,
+    this.shopId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['email'] = Variable<String>(email);
+    map['role'] = Variable<String>(role);
+    map['is_from_owner'] = Variable<bool>(isFromOwner);
+    if (!nullToAbsent || shopId != null) {
+      map['shop_id'] = Variable<String>(shopId);
+    }
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  EmployeeTableCompanion toCompanion(bool nullToAbsent) {
+    return EmployeeTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      email: Value(email),
+      role: Value(role),
+      isFromOwner: Value(isFromOwner),
+      shopId: shopId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shopId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory EmployeeTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EmployeeTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      email: serializer.fromJson<String>(json['email']),
+      role: serializer.fromJson<String>(json['role']),
+      isFromOwner: serializer.fromJson<bool>(json['isFromOwner']),
+      shopId: serializer.fromJson<String?>(json['shopId']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'email': serializer.toJson<String>(email),
+      'role': serializer.toJson<String>(role),
+      'isFromOwner': serializer.toJson<bool>(isFromOwner),
+      'shopId': serializer.toJson<String?>(shopId),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  EmployeeTableData copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? role,
+    bool? isFromOwner,
+    Value<String?> shopId = const Value.absent(),
+    String? createdAt,
+  }) => EmployeeTableData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    email: email ?? this.email,
+    role: role ?? this.role,
+    isFromOwner: isFromOwner ?? this.isFromOwner,
+    shopId: shopId.present ? shopId.value : this.shopId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  EmployeeTableData copyWithCompanion(EmployeeTableCompanion data) {
+    return EmployeeTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      email: data.email.present ? data.email.value : this.email,
+      role: data.role.present ? data.role.value : this.role,
+      isFromOwner: data.isFromOwner.present
+          ? data.isFromOwner.value
+          : this.isFromOwner,
+      shopId: data.shopId.present ? data.shopId.value : this.shopId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EmployeeTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('email: $email, ')
+          ..write('role: $role, ')
+          ..write('isFromOwner: $isFromOwner, ')
+          ..write('shopId: $shopId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, email, role, isFromOwner, shopId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EmployeeTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.email == this.email &&
+          other.role == this.role &&
+          other.isFromOwner == this.isFromOwner &&
+          other.shopId == this.shopId &&
+          other.createdAt == this.createdAt);
+}
+
+class EmployeeTableCompanion extends UpdateCompanion<EmployeeTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> email;
+  final Value<String> role;
+  final Value<bool> isFromOwner;
+  final Value<String?> shopId;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const EmployeeTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.email = const Value.absent(),
+    this.role = const Value.absent(),
+    this.isFromOwner = const Value.absent(),
+    this.shopId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  EmployeeTableCompanion.insert({
+    required String id,
+    required String name,
+    required String email,
+    this.role = const Value.absent(),
+    this.isFromOwner = const Value.absent(),
+    this.shopId = const Value.absent(),
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       email = Value(email),
+       createdAt = Value(createdAt);
+  static Insertable<EmployeeTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? email,
+    Expression<String>? role,
+    Expression<bool>? isFromOwner,
+    Expression<String>? shopId,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (email != null) 'email': email,
+      if (role != null) 'role': role,
+      if (isFromOwner != null) 'is_from_owner': isFromOwner,
+      if (shopId != null) 'shop_id': shopId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  EmployeeTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? email,
+    Value<String>? role,
+    Value<bool>? isFromOwner,
+    Value<String?>? shopId,
+    Value<String>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return EmployeeTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      isFromOwner: isFromOwner ?? this.isFromOwner,
+      shopId: shopId ?? this.shopId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (isFromOwner.present) {
+      map['is_from_owner'] = Variable<bool>(isFromOwner.value);
+    }
+    if (shopId.present) {
+      map['shop_id'] = Variable<String>(shopId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EmployeeTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('email: $email, ')
+          ..write('role: $role, ')
+          ..write('isFromOwner: $isFromOwner, ')
+          ..write('shopId: $shopId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3994,12 +4449,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $BillMedicineTableTable(this);
   late final $OwnerAuthTableTable ownerAuthTable = $OwnerAuthTableTable(this);
   late final $ShopTableTable shopTable = $ShopTableTable(this);
+  late final $EmployeeTableTable employeeTable = $EmployeeTableTable(this);
   late final InventoryMedicineDao inventoryMedicineDao = InventoryMedicineDao(
     this as AppDatabase,
   );
   late final BillDao billDao = BillDao(this as AppDatabase);
   late final OwnerAuthDao ownerAuthDao = OwnerAuthDao(this as AppDatabase);
   late final ShopDao shopDao = ShopDao(this as AppDatabase);
+  late final EmployeeDao employeeDao = EmployeeDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4010,6 +4467,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     billMedicineTable,
     ownerAuthTable,
     shopTable,
+    employeeTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6164,6 +6622,259 @@ typedef $$ShopTableTableProcessedTableManager =
       ShopTableData,
       PrefetchHooks Function()
     >;
+typedef $$EmployeeTableTableCreateCompanionBuilder =
+    EmployeeTableCompanion Function({
+      required String id,
+      required String name,
+      required String email,
+      Value<String> role,
+      Value<bool> isFromOwner,
+      Value<String?> shopId,
+      required String createdAt,
+      Value<int> rowid,
+    });
+typedef $$EmployeeTableTableUpdateCompanionBuilder =
+    EmployeeTableCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> email,
+      Value<String> role,
+      Value<bool> isFromOwner,
+      Value<String?> shopId,
+      Value<String> createdAt,
+      Value<int> rowid,
+    });
+
+class $$EmployeeTableTableFilterComposer
+    extends Composer<_$AppDatabase, $EmployeeTableTable> {
+  $$EmployeeTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFromOwner => $composableBuilder(
+    column: $table.isFromOwner,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shopId => $composableBuilder(
+    column: $table.shopId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$EmployeeTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $EmployeeTableTable> {
+  $$EmployeeTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isFromOwner => $composableBuilder(
+    column: $table.isFromOwner,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shopId => $composableBuilder(
+    column: $table.shopId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EmployeeTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EmployeeTableTable> {
+  $$EmployeeTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFromOwner => $composableBuilder(
+    column: $table.isFromOwner,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get shopId =>
+      $composableBuilder(column: $table.shopId, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$EmployeeTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EmployeeTableTable,
+          EmployeeTableData,
+          $$EmployeeTableTableFilterComposer,
+          $$EmployeeTableTableOrderingComposer,
+          $$EmployeeTableTableAnnotationComposer,
+          $$EmployeeTableTableCreateCompanionBuilder,
+          $$EmployeeTableTableUpdateCompanionBuilder,
+          (
+            EmployeeTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $EmployeeTableTable,
+              EmployeeTableData
+            >,
+          ),
+          EmployeeTableData,
+          PrefetchHooks Function()
+        > {
+  $$EmployeeTableTableTableManager(_$AppDatabase db, $EmployeeTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EmployeeTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EmployeeTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EmployeeTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<bool> isFromOwner = const Value.absent(),
+                Value<String?> shopId = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => EmployeeTableCompanion(
+                id: id,
+                name: name,
+                email: email,
+                role: role,
+                isFromOwner: isFromOwner,
+                shopId: shopId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required String email,
+                Value<String> role = const Value.absent(),
+                Value<bool> isFromOwner = const Value.absent(),
+                Value<String?> shopId = const Value.absent(),
+                required String createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => EmployeeTableCompanion.insert(
+                id: id,
+                name: name,
+                email: email,
+                role: role,
+                isFromOwner: isFromOwner,
+                shopId: shopId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$EmployeeTableTable, EmployeeTableData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $EmployeeTableTable,
+                    EmployeeTableData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$EmployeeTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EmployeeTableTable,
+      EmployeeTableData,
+      $$EmployeeTableTableFilterComposer,
+      $$EmployeeTableTableOrderingComposer,
+      $$EmployeeTableTableAnnotationComposer,
+      $$EmployeeTableTableCreateCompanionBuilder,
+      $$EmployeeTableTableUpdateCompanionBuilder,
+      (
+        EmployeeTableData,
+        BaseReferences<_$AppDatabase, $EmployeeTableTable, EmployeeTableData>,
+      ),
+      EmployeeTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6178,4 +6889,6 @@ class $AppDatabaseManager {
       $$OwnerAuthTableTableTableManager(_db, _db.ownerAuthTable);
   $$ShopTableTableTableManager get shopTable =>
       $$ShopTableTableTableManager(_db, _db.shopTable);
+  $$EmployeeTableTableTableManager get employeeTable =>
+      $$EmployeeTableTableTableManager(_db, _db.employeeTable);
 }

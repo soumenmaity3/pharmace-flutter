@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -149,217 +151,241 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     print('build1');
     final theme = Theme.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 15),
-                        Text(
-                          "Good evening,",
-                          style: theme.textTheme.labelMedium,
-                        ),
-                        Text(
-                          ref.watch(ownerProvider).value?.name ?? '',
-                          style: theme.textTheme.titleLarge,
-                        ),
-                        SizedBox(height: 5),
-                        Consumer(
-                          builder: (_, ref, _) {
-                            final shopName =
-                                ref.watch(
-                                  selectedShopProvider.select(
-                                    (s) => s?.shopName,
-                                  ),
-                                ) ??
-                                'No shop selected';
-                            final verifyStatus = ref.watch(
-                              selectedShopProvider.select(
-                                (s) => s?.verifyStatus,
-                              ),
-                            );
+    return RefreshIndicator(
+      onRefresh: () async {
+        await Future.delayed(Duration(seconds: 2));
+        try {
+          final result = await InternetAddress.lookup('example.com');
+          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+            print('connected');
+          }
+        } on SocketException catch (_) {
+          print('not connected');
+        }
+      },
+      displacement: 100.0,
+      child: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 15),
+                          Text(
+                            "Good evening,",
+                            style: theme.textTheme.labelMedium,
+                          ),
+                          Text(
+                            ref.watch(ownerProvider).value?.name ?? '',
+                            style: theme.textTheme.titleLarge,
+                          ),
+                          SizedBox(height: 5),
+                          Consumer(
+                            builder: (_, ref, _) {
+                              final shopName =
+                                  ref.watch(
+                                    selectedShopProvider.select(
+                                      (s) => s?.shopName,
+                                    ),
+                                  ) ??
+                                  'No shop selected';
+                              final verifyStatus = ref.watch(
+                                selectedShopProvider.select(
+                                  (s) => s?.verifyStatus,
+                                ),
+                              );
 
-                            return CompositedTransformTarget(
-                              link: _shopLayerLink,
-                              child: InkWell(
-                                onTap: _toggleShopDropdown,
-                                child: Row(
+                              return CompositedTransformTarget(
+                                link: _shopLayerLink,
+                                child: InkWell(
+                                  onTap: _toggleShopDropdown,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        _shortShopName(shopName),
+                                        style: theme.textTheme.labelSmall,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      _verificationStatus(
+                                        _mapVerifyStatus(verifyStatus),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      FaIcon(
+                                        _isShopDropdownOpen
+                                            ? FontAwesomeIcons.angleUp
+                                            : FontAwesomeIcons.angleDown,
+                                        size: 10,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _deliveryStatus(
+                            isAvailable: isDeliveryEnabled,
+                            onTap: () {
+                              _showDeliveryStatusBottomSheet(
+                                context: context,
+                                isCurrentlyAvailable: isDeliveryEnabled,
+                                onToggle: () async {
+                                  Navigator.pop(context);
+
+                                  setState(() {
+                                    isDeliveryEnabled = !isDeliveryEnabled;
+                                  });
+                                  // Optional: Call your API / Riverpod provider to update backend
+                                  // await ref.read(shopProvider.notifier).updateDeliveryStatus(isDeliveryEnabled);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        isDeliveryEnabled
+                                            ? 'Delivery service enabled.'
+                                            : 'Delivery service paused.',
+                                      ),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                          SizedBox(width: 10),
+                          Consumer(
+                            builder: (_, ref, _) {
+                              final selectedShop = ref.watch(
+                                selectedShopProvider,
+                              );
+                              return OpenCloseSwitchWidget(
+                                key: ValueKey(selectedShop?.id),
+                                initialIsOpen: selectedShop?.isOpen ?? true,
+                                onStatusChanged: (value) async {
+                                  if (selectedShop != null) {
+                                    final res = await ref
+                                        .read(shopProvider.notifier)
+                                        .updateShopStatus(
+                                          selectedShop.id,
+                                          value,
+                                        );
+
+                                    final success =
+                                        res.statusCode >= 200 &&
+                                        res.statusCode < 300;
+
+                                    if (!success && context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            res.message ??
+                                                'Failed to update status',
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                    return success;
+                                  }
+                                  return false;
+                                },
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 8),
+                          Material(
+                            color:
+                                theme.cardTheme.color ??
+                                theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const NotificationScreen(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.grey.withValues(alpha: 0.2),
+                                  ),
+                                ),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
                                   children: [
-                                    Text(
-                                      _shortShopName(shopName),
-                                      style: theme.textTheme.labelSmall,
+                                    Icon(
+                                      Icons.notifications_outlined,
+                                      size: 20,
+                                      color: theme.colorScheme.onSurface,
                                     ),
-                                    const SizedBox(width: 5),
-                                    _verificationStatus(
-                                      _mapVerifyStatus(verifyStatus),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    FaIcon(
-                                      _isShopDropdownOpen
-                                          ? FontAwesomeIcons.angleUp
-                                          : FontAwesomeIcons.angleDown,
-                                      size: 10,
+                                    Positioned(
+                                      right: -1,
+                                      top: -1,
+                                      child: Container(
+                                        width: 7,
+                                        height: 7,
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.error,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _deliveryStatus(
-                          isAvailable: isDeliveryEnabled,
-                          onTap: () {
-                            _showDeliveryStatusBottomSheet(
-                              context: context,
-                              isCurrentlyAvailable: isDeliveryEnabled,
-                              onToggle: () async {
-                                Navigator.pop(context);
-
-                                setState(() {
-                                  isDeliveryEnabled = !isDeliveryEnabled;
-                                });
-                                // Optional: Call your API / Riverpod provider to update backend
-                                // await ref.read(shopProvider.notifier).updateDeliveryStatus(isDeliveryEnabled);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      isDeliveryEnabled
-                                          ? 'Delivery service enabled.'
-                                          : 'Delivery service paused.',
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        SizedBox(width: 10),
-                        Consumer(
-                          builder: (_, ref, _) {
-                            final selectedShop = ref.watch(
-                              selectedShopProvider,
-                            );
-                            return OpenCloseSwitchWidget(
-                              key: ValueKey(selectedShop?.id),
-                              initialIsOpen: selectedShop?.isOpen ?? true,
-                              onStatusChanged: (value) async {
-                                if (selectedShop != null) {
-                                  final res = await ref
-                                      .read(shopProvider.notifier)
-                                      .updateShopStatus(selectedShop.id, value);
-
-                                  final success =
-                                      res.statusCode >= 200 &&
-                                      res.statusCode < 300;
-
-                                  if (!success && context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          res.message ??
-                                              'Failed to update status',
-                                        ),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                  return success;
-                                }
-                                return false;
-                              },
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        Material(
-                          color: theme.cardTheme.color ?? theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const NotificationScreen(),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Colors.grey.withValues(alpha: 0.2),
-                                ),
-                              ),
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  Icon(
-                                    Icons.notifications_outlined,
-                                    size: 20,
-                                    color: theme.colorScheme.onSurface,
-                                  ),
-                                  Positioned(
-                                    right: -1,
-                                    top: -1,
-                                    child: Container(
-                                      width: 7,
-                                      height: 7,
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.error,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                _businessPluseCard(),
-                SizedBox(height: 16),
-                SalesOverviewCard(),
-                SizedBox(height: 10),
-                Text("Quick Actions", style: theme.textTheme.titleLarge),
-                SizedBox(height: 10),
-                _quickAnction(),
-                SizedBox(height: 5),
-                Text("Inventory Health", style: theme.textTheme.titleLarge),
-                SizedBox(height: 10),
-                _inventoryHealth(),
-                Text("Low stock medicines", style: theme.textTheme.titleLarge),
-                SizedBox(height: 10),
-                _lowStockMedicineList(theme),
-                SizedBox(height: 10),
-                Text("Expiring Soon", style: theme.textTheme.titleLarge),
-                SizedBox(height: 10),
-                _expiringSoonList(theme),
-                SizedBox(height: 10),
-                Text("Recent Sales", style: theme.textTheme.titleLarge),
-                SizedBox(height: 10),
-                _recentSales(theme),
-                SizedBox(height: 20),
-              ],
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  _businessPluseCard(),
+                  SizedBox(height: 16),
+                  SalesOverviewCard(),
+                  SizedBox(height: 10),
+                  Text("Quick Actions", style: theme.textTheme.titleLarge),
+                  SizedBox(height: 10),
+                  _quickAnction(),
+                  SizedBox(height: 5),
+                  Text("Inventory Health", style: theme.textTheme.titleLarge),
+                  SizedBox(height: 10),
+                  _inventoryHealth(),
+                  Text(
+                    "Low stock medicines",
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  SizedBox(height: 10),
+                  _lowStockMedicineList(theme),
+                  SizedBox(height: 10),
+                  Text("Expiring Soon", style: theme.textTheme.titleLarge),
+                  SizedBox(height: 10),
+                  _expiringSoonList(theme),
+                  SizedBox(height: 10),
+                  Text("Recent Sales", style: theme.textTheme.titleLarge),
+                  SizedBox(height: 10),
+                  _recentSales(theme),
+                  SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),

@@ -33,7 +33,7 @@ class ApiService {
   }
 
   static String get baseUrl =>
-      'http://${Platform.isAndroid ? '10.95.27.150' : 'localhost'}:8080/v1';
+      'http://${Platform.isAndroid ? '10.127.103.150' : 'localhost'}:8080/v1';
   static const Map<String, String> header = {
     'Content-Type': 'application/json',
   };
@@ -645,9 +645,9 @@ class ApiService {
     }
   }
 
-  Future<ApiResponse<List<EmployeeOutputModel>>> getAllEployee(
-    String shopId,
-  ) async {
+  Future<ApiResponse<List<EmployeeOutputModel>>> getAllEmployee({
+    required String shopId,
+  }) async {
     try {
       final token = await getToken();
       if (token == null || token.isEmpty) {

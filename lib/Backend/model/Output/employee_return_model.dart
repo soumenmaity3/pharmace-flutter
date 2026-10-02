@@ -73,8 +73,9 @@ class EmployeeReturnModel {
 
   static List<EmployeeReturnModel> fromJsonList(List<dynamic> jsonList) {
     return jsonList
-        .map((item) =>
-            EmployeeReturnModel.fromJson(item as Map<String, dynamic>))
+        .map(
+          (item) => EmployeeReturnModel.fromJson(item as Map<String, dynamic>),
+        )
         .toList();
   }
 }

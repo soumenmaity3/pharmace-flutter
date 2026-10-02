@@ -11,12 +11,14 @@ class BuildNotificationCardWidget extends StatefulWidget {
     required this.theme,
     required this.appColors,
     required this._notifications,
+    this.onDelete,
   });
 
   final PharmacyNotification item;
   final ThemeData theme;
   final AppThemeExtension appColors;
   final List<PharmacyNotification> _notifications;
+  final VoidCallback? onDelete;
 
   @override
   State<BuildNotificationCardWidget> createState() =>
@@ -204,7 +206,6 @@ class _BuildNotificationCardWidgetState
         ),
       ),
     );
-    ;
   }
 
   void _toggleNotificationRead(PharmacyNotification item) {
@@ -214,10 +215,11 @@ class _BuildNotificationCardWidgetState
   }
 
   void _deleteNotification(PharmacyNotification item) {
+    print('called delete');
     final index = widget._notifications.indexOf(item);
-    setState(() {
-      widget._notifications.remove(item);
-    });
+    widget._notifications.remove(item);
+    widget.onDelete?.call();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Removed "${item.title}"'),
@@ -229,6 +231,7 @@ class _BuildNotificationCardWidgetState
           onPressed: () {
             setState(() {
               widget._notifications.insert(index, item);
+              widget.onDelete?.call();
             });
           },
         ),

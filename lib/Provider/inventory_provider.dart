@@ -52,7 +52,7 @@ class InventoryNotifier extends StateNotifier<InventoryState> {
     if (response.statusCode >= 200 &&
         response.statusCode < 300 &&
         response.data != null) {
-      await syncFromBackend(response.data!, shopId); // 👈 pass shopId here
+      await syncFromBackend(response.data!, shopId);
     }
     return response;
   }

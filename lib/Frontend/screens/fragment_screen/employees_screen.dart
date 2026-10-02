@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:pharmace/Backend/api_service.dart';
 import 'package:pharmace/Backend/model/Input/shop_owner_model.dart';
 import 'package:pharmace/Frontend/Employees/model/employee_model.dart';
 import 'package:pharmace/Frontend/Employees/widget/employee_list_widdget.dart';
@@ -11,11 +13,71 @@ import 'package:pharmace/Provider/employee_provider.dart';
 import 'package:pharmace/Provider/owner_provider.dart';
 import 'package:pharmace/Provider/shop_provider.dart';
 
-class EmployeesScreen extends ConsumerWidget {
+class EmployeesScreen extends ConsumerStatefulWidget {
   const EmployeesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EmployeesScreen> createState() => _EmployeesScreenState();
+}
+
+class _EmployeesScreenState extends ConsumerState<EmployeesScreen> {
+  // ApiService apiService = ApiService();
+  bool _isLoading = false;
+  String? _currentShopId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final selectedShopId = ref.read(selectedShopProvider)?.id;
+      if (selectedShopId != null) {
+        _currentShopId = selectedShopId;
+        _fetchInventory(shopId: _currentShopId!);
+      }
+    });
+  }
+
+  Future<void> _fetchInventory({required String shopId}) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await ref
+          .read(employeeProvider.notifier)
+          .fetchAndSyncFromBackend(shopId: shopId);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        // Success: The provider usually updates the state internally,
+        // but you can add specific success logic here if needed.
+      } else {
+        // Handle error status codes (e.g., 400, 401, 500)
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to fetch employees: ${response.message}'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Handle network or parsing errors
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final owner = ref.watch(ownerProvider).value;
     final selectedShop = ref.watch(selectedShopProvider);
@@ -46,120 +108,139 @@ class EmployeesScreen extends ConsumerWidget {
             ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 15),
-                SalesSearchBar(
-                  onChanged: (value) {
-                    final query = value.toLowerCase().trim();
-                    ref.read(employeeProvider.notifier).search(query);
-                  },
-                  onFilterTap: () {
-                    showMenu(
-                      context: context,
-                      position: const RelativeRect.fromLTRB(100, 100, 0, 0),
-                      items: [
-                        const PopupMenuItem(value: 'all', child: Text('All')),
-                        const PopupMenuItem(
-                          value: 'manager',
-                          child: Text('Manager'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'pharmacist',
-                          child: Text('Pharmacist'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'cashier',
-                          child: Text('Cashier'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'staff',
-                          child: Text('Staff'),
-                        ),
-                      ],
-                    ).then((value) {
-                      if (value != null) {
-                        ref
-                            .read(employeeProvider.notifier)
-                            .filteredEmployee(value);
-                      }
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // --- Owner as Self-Employee Section ---
-                _ownerSelfEmployeeSection(
-                  context,
-                  theme,
-                  owner,
-                  selectedShop?.isOwnerEmployee ?? false,
-                ),
-
-                const SizedBox(height: 8),
-
-                // --- Staff Members List Section ---
-                Consumer(
-                  builder: (_, ref, _) {
-                    final filteredEmployee = ref
-                        .watch(employeeProvider)
-                        .filteredEmployee;
-
-                    return Column(
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: () async {
+                  await Future.delayed(Duration(seconds: 2));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SingleChildScrollView(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 6,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Staff Members',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        const SizedBox(height: 15),
+                        SalesSearchBar(
+                          onChanged: (value) {
+                            final query = value.toLowerCase().trim();
+                            ref.read(employeeProvider.notifier).search(query);
+                          },
+                          onFilterTap: () {
+                            showMenu(
+                              context: context,
+                              position: const RelativeRect.fromLTRB(
+                                100,
+                                100,
+                                0,
+                                0,
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
+                              items: [
+                                const PopupMenuItem(
+                                  value: 'all',
+                                  child: Text('All'),
                                 ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
+                                const PopupMenuItem(
+                                  value: 'manager',
+                                  child: Text('Manager'),
                                 ),
-                                child: Text(
-                                  '${filteredEmployee.length}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
-                                  ),
+                                const PopupMenuItem(
+                                  value: 'pharmacist',
+                                  child: Text('Pharmacist'),
                                 ),
-                              ),
-                            ],
-                          ),
+                                const PopupMenuItem(
+                                  value: 'cashier',
+                                  child: Text('Cashier'),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'staff',
+                                  child: Text('Staff'),
+                                ),
+                              ],
+                            ).then((value) {
+                              if (value != null) {
+                                ref
+                                    .read(employeeProvider.notifier)
+                                    .filteredEmployee(value);
+                              }
+                            });
+                          },
                         ),
+                        const SizedBox(height: 16),
+
+                        // --- Owner as Self-Employee Section ---
+                        _ownerSelfEmployeeSection(
+                          context,
+                          theme,
+                          owner,
+                          selectedShop?.isOwnerEmployee ?? false,
+                        ),
+
                         const SizedBox(height: 8),
-                        _employeeList(theme, filteredEmployee),
+
+                        // --- Staff Members List Section ---
+                        Consumer(
+                          builder: (_, ref, _) {
+                            final filteredEmployee = ref
+                                .watch(employeeProvider)
+                                .filteredEmployee;
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 6,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Staff Members',
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withValues(
+                                            alpha: 0.12,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '${filteredEmployee.length}',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                _employeeList(theme, filteredEmployee),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 20),
                       ],
-                    );
-                  },
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }
@@ -464,7 +545,9 @@ class EmployeesScreen extends ConsumerWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (ctx) => const AddEmployeesScreen(isRequestForSelfEmployee: true,),
+                    builder: (ctx) => const AddEmployeesScreen(
+                      isRequestForSelfEmployee: true,
+                    ),
                   ),
                 );
               },
@@ -506,27 +589,66 @@ class EmployeesScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(10),
         color: theme.cardColor,
       ),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: allEmployee.length,
-        itemBuilder: (context, index) {
-          final employee = allEmployee[index];
-          return EmployeeListWidget(
-            employeeId: employee.id,
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (ctx) => EmployeeDetailsScreen(empId: employee.id),
+      child: allEmployee.isNotEmpty
+          ? ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: allEmployee.length,
+              itemBuilder: (context, index) {
+                final employee = allEmployee[index];
+                return EmployeeListWidget(
+                  employeeId: employee.id,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) =>
+                            EmployeeDetailsScreen(empId: employee.id),
+                      ),
+                    );
+                  },
+                );
+              },
+              separatorBuilder: (context, index) {
+                return const Divider();
+              },
+            )
+          : SizedBox(
+              width: double.infinity,
+              height: 250,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Icon(Icons.people_outline),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "No Staff Members Found",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Your team members will appear here once they are added to the shop or when they match your search criteria.",
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.textTheme.bodySmall?.color?.withValues(
+                          alpha: 0.7,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          );
-        },
-        separatorBuilder: (context, index) {
-          return const Divider();
-        },
-      ),
+              ),
+            ),
     );
   }
 }
