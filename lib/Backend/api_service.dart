@@ -33,7 +33,7 @@ class ApiService {
   }
 
   static String get baseUrl =>
-      'http://${Platform.isAndroid ? '10.127.103.150' : 'localhost'}:8080/v1';
+      'http://${Platform.isAndroid ? '10.39.138.150' : 'localhost'}:8080/v1';
   static const Map<String, String> header = {
     'Content-Type': 'application/json',
   };

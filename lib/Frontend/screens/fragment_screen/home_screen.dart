@@ -31,7 +31,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  // --- Shop selector overlay fields ---
   OverlayEntry? _shopOverlayEntry;
   final LayerLink _shopLayerLink = LayerLink();
   bool _isShopDropdownOpen = false;
@@ -357,8 +356,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
+                  SizedBox(height: 10,),
+                  _operationalPulseCard(theme,context),
                   SizedBox(height: 16),
-                  _businessPluseCard(),
+                  _businessPulseCard(),
                   SizedBox(height: 16),
                   SalesOverviewCard(),
                   SizedBox(height: 10),
@@ -698,7 +699,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-Widget _businessPluseCard(
+Widget _businessPulseCard(
   /*{
   required String totalRevenue,
   required String todaySales,
@@ -884,6 +885,79 @@ Widget _verticalDivider() {
     color: AppColors.whiteText60.withValues(alpha: 0.12),
   );
 }
+
+Widget _sectionHeader(
+    ThemeData theme, {
+      required String title,
+      required String subtitle,
+    }) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(title, style: theme.textTheme.titleLarge),
+      const SizedBox(height: 3),
+      Text(subtitle, style: theme.textTheme.bodySmall),
+    ],
+  );
+}
+Widget _operationalPulseCard(ThemeData theme,BuildContext context) {
+  return InkWell(
+    borderRadius: BorderRadius.circular(16),
+    onTap: () {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const NotificationScreen()),
+      );
+    },
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.warningLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.warning.withValues(alpha: .22)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.priority_high_rounded,
+              color: AppColors.warning,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Operations need attention',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: AppColors.warning,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '${lowStockListData.length} low-stock items · ${expiringSoonData.length} expiring batches',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.lightTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.warning),
+        ],
+      ),
+    ),
+  );
+}
+
 
 enum ShopVerificationStatus { verified, pending, rejected }
 
