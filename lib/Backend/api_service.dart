@@ -5,6 +5,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:pharmace/Backend/auth/secure_storage_service.dart';
 import 'package:pharmace/Backend/model/Input/medicine_input_model.dart';
 import 'package:pharmace/Backend/model/Input/shop_model.dart';
+import 'package:pharmace/Backend/model/Output/emp_invite.dart';
 import 'package:pharmace/Backend/model/Output/employee_return_model.dart';
 import 'package:pharmace/Backend/model/Output/medicine_output_model.dart';
 import 'package:pharmace/Backend/model/Output/shop_return_model.dart';
@@ -32,8 +33,11 @@ class ApiService {
     }
   }
 
+  static const String _host = 'pharmace.servehttp.com';
+
   static String get baseUrl =>
-      'http://${Platform.isAndroid ? '10.39.138.150' : 'localhost'}:8080/v1';
+      'http://${Platform.isAndroid ? _host : 'localhost'}:8080/v1';
+
   static const Map<String, String> header = {
     'Content-Type': 'application/json',
   };
@@ -645,7 +649,7 @@ class ApiService {
     }
   }
 
-  Future<ApiResponse<List<EmployeeOutputModel>>> getAllEmployee({
+  Future<ApiResponse<List<EmployeeReturnModel>>> getAllEmployee({
     required String shopId,
   }) async {
     try {
@@ -699,6 +703,55 @@ class ApiService {
         data: response.statusCode >= 200 && response.statusCode < 300
             ? allEmployee
             : null,
+        message: message,
+      );
+    } catch (e) {
+      return ApiResponse(statusCode: 500, data: null, message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<EmpInvite>> generateInviteCode({
+    required String shopId,
+    required EmpInvite empInvite,
+  }) async {
+    try {
+      final token = await getToken();
+      if (token == null || token.isEmpty) {
+        return ApiResponse(
+          statusCode: 401,
+          data: null,
+          message: 'Token is not valid',
+        );
+      }
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/ownr/create-emp/$shopId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode(empInvite.toJson()),
+          )
+          .timeout(Duration(seconds: 15));
+      EmpInvite? json;
+      String? message;
+      if (response.body.trim().isNotEmpty) {
+        try {
+          final decode = jsonDecode(response.body);
+          if (decode is Map<String, dynamic>) {
+            json = EmpInvite.fromJson(decode);
+            message =
+                decode['message']?.toString() ??
+                decode['details']?.toString() ??
+                decode['error']?.toString();
+          } else {
+            message = decode;
+          }
+        } catch (_) {}
+      }
+      return ApiResponse<EmpInvite>(
+        statusCode: response.statusCode,
+        data: json,
         message: message,
       );
     } catch (e) {

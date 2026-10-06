@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pharmace/Backend/model/Output/emp_invite.dart';
 import 'package:pharmace/Frontend/Employees/model/employee_model.dart';
 import 'package:pharmace/Frontend/Employees/model/employee_task.dart';
 import 'package:pharmace/Frontend/screens/other_screen/employee_qr_screen.dart';
 import 'package:pharmace/Frontend/theme/app_colors.dart';
 import 'package:pharmace/Provider/employee_provider.dart';
+import 'package:pharmace/Provider/shop_provider.dart';
 
 class EmployeeDetailsScreen extends ConsumerStatefulWidget {
   const EmployeeDetailsScreen({super.key, required this.empId});
@@ -18,7 +20,7 @@ class EmployeeDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
-  late List<EmployeeTask> _tasks = [];
+  final List<EmployeeTask> _tasks = [];
 
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
@@ -31,44 +33,44 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
     );
   }
 
-  Color _getRoleColor(Role role) {
+  Color _getRoleColor(RoleEmp role) {
     switch (role) {
-      case Role.manager:
+      case RoleEmp.manager:
         return AppColors.managerForeground;
-      case Role.pharmacist:
+      case RoleEmp.pharmacist:
         return AppColors.pharmacistForeground;
-      case Role.cashier:
+      case RoleEmp.cashier:
         return AppColors.cashierForeground;
-      case Role.staff:
+      case RoleEmp.staff:
         return AppColors.staffForeground;
     }
   }
 
-  Color _getRoleBgColor(Role role, bool isDark) {
+  Color _getRoleBgColor(RoleEmp role, bool isDark) {
     if (isDark) {
       return _getRoleColor(role).withValues(alpha: 0.18);
     }
     switch (role) {
-      case Role.manager:
+      case RoleEmp.manager:
         return AppColors.managerBackground;
-      case Role.pharmacist:
+      case RoleEmp.pharmacist:
         return AppColors.pharmacistBackground;
-      case Role.cashier:
+      case RoleEmp.cashier:
         return AppColors.cashierBackground;
-      case Role.staff:
+      case RoleEmp.staff:
         return AppColors.staffBackground;
     }
   }
 
-  String _getRoleName(Role role) {
+  String _getRoleName(RoleEmp role) {
     switch (role) {
-      case Role.manager:
+      case RoleEmp.manager:
         return 'Manager';
-      case Role.pharmacist:
+      case RoleEmp.pharmacist:
         return 'Pharmacist';
-      case Role.cashier:
+      case RoleEmp.cashier:
         return 'Cashier';
-      case Role.staff:
+      case RoleEmp.staff:
         return 'Staff';
     }
   }
@@ -526,9 +528,18 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
                 const SizedBox(width: 4),
                 ElevatedButton.icon(
                   onPressed: () {
+                    final shopId = ref.read(selectedShopProvider)?.id ?? '';
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const EmployeeQrScreen(),
+                        builder: (context) => EmployeeQrScreen(
+                          EmpInvite(
+                            inviteCode,
+                            shopId,
+                            empEmail: currentEmployee.email,
+                            empRole: currentEmployee.role,
+                            empName: currentEmployee.name
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -2040,7 +2051,7 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
     final nameController = TextEditingController(text: currentEmployee.name);
     final phoneController = TextEditingController(text: currentEmployee.phone);
     final emailController = TextEditingController(text: currentEmployee.email);
-    Role selectedRole = currentEmployee.role;
+    RoleEmp selectedRole = currentEmployee.role;
 
     showModalBottomSheet(
       context: context,
@@ -2125,7 +2136,7 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
-                    children: Role.values.map((role) {
+                    children: RoleEmp.values.map((role) {
                       final isSelected = selectedRole == role;
                       return ChoiceChip(
                         label: Text(_getRoleName(role)),
@@ -2205,22 +2216,22 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
     }
   }
 
-  IconData _getRoleIcon(Role role) {
+  IconData _getRoleIcon(RoleEmp role) {
     switch (role) {
-      case Role.manager:
+      case RoleEmp.manager:
         return Icons.admin_panel_settings_outlined;
-      case Role.pharmacist:
+      case RoleEmp.pharmacist:
         return Icons.medical_services_outlined;
-      case Role.cashier:
+      case RoleEmp.cashier:
         return Icons.point_of_sale_outlined;
-      case Role.staff:
+      case RoleEmp.staff:
         return Icons.badge_outlined;
     }
   }
 
-  List<_PermissionItem> _getPermissionsForRole(Role role) {
+  List<_PermissionItem> _getPermissionsForRole(RoleEmp role) {
     switch (role) {
-      case Role.manager:
+      case RoleEmp.manager:
         return [
           _PermissionItem('Billing & Checkout', true),
           _PermissionItem('Inventory Management', true),
@@ -2229,7 +2240,7 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
           _PermissionItem('Financial Reports', true),
           _PermissionItem('Refund Approvals', true),
         ];
-      case Role.pharmacist:
+      case RoleEmp.pharmacist:
         return [
           _PermissionItem('Billing & Checkout', true),
           _PermissionItem('Prescription Validation', true),
@@ -2238,7 +2249,7 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
           _PermissionItem('Price Override & Discounts', false),
           _PermissionItem('Staff Management', false),
         ];
-      case Role.cashier:
+      case RoleEmp.cashier:
         return [
           _PermissionItem('Billing & Checkout', true),
           _PermissionItem('Cash Drawer Access', true),
@@ -2247,7 +2258,7 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
           _PermissionItem('Discounts Approval', false),
           _PermissionItem('Financial Reports', false),
         ];
-      case Role.staff:
+      case RoleEmp.staff:
         return [
           _PermissionItem('View Inventory', true),
           _PermissionItem('Stock Inward Assistance', true),

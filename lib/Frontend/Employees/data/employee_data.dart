@@ -9,7 +9,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '28.4K',
     sales: 34,
     rating: 4.8,
-    role: Role.manager,
+    role: RoleEmp.manager,
     id: '09921',
   ),
   EmployeeModel(
@@ -20,7 +20,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '19.2K',
     sales: 27,
     rating: 4.7,
-    role: Role.pharmacist,
+    role: RoleEmp.pharmacist,
     id: '09922',
   ),
   EmployeeModel(
@@ -31,7 +31,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '22.6K',
     sales: 31,
     rating: 4.6,
-    role: Role.cashier,
+    role: RoleEmp.cashier,
     id: '09923',
   ),
   EmployeeModel(
@@ -42,7 +42,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '16.8K',
     sales: 21,
     rating: 4.5,
-    role: Role.pharmacist,
+    role: RoleEmp.pharmacist,
     id: '09924',
   ),
   EmployeeModel(
@@ -53,7 +53,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '9.4K',
     sales: 14,
     rating: 4.4,
-    role: Role.staff,
+    role: RoleEmp.staff,
     id: '09925',
   ),
   EmployeeModel(
@@ -64,7 +64,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '7.1K',
     sales: 11,
     rating: 4.3,
-    role: Role.cashier,
+    role: RoleEmp.cashier,
     id: '09926',
   ),
   EmployeeModel(
@@ -75,7 +75,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '4.6K',
     sales: 7,
     rating: 4.5,
-    role: Role.cashier,
+    role: RoleEmp.cashier,
     id: '09927',
   ),
   EmployeeModel(
@@ -86,7 +86,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '28.4K',
     sales: 34,
     rating: 4.8,
-    role: Role.manager,
+    role: RoleEmp.manager,
     id: '09928',
   ),
   EmployeeModel(
@@ -97,7 +97,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '19.2K',
     sales: 27,
     rating: 4.7,
-    role: Role.pharmacist,
+    role: RoleEmp.pharmacist,
     id: '09929',
   ),
   EmployeeModel(
@@ -108,7 +108,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '22.6K',
     sales: 31,
     rating: 4.6,
-    role: Role.cashier,
+    role: RoleEmp.cashier,
     id: '09930',
   ),
   EmployeeModel(
@@ -119,7 +119,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '16.8K',
     sales: 21,
     rating: 4.5,
-    role: Role.pharmacist,
+    role: RoleEmp.pharmacist,
     id: '09931',
   ),
   EmployeeModel(
@@ -130,7 +130,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '9.4K',
     sales: 14,
     rating: 4.4,
-    role: Role.staff,
+    role: RoleEmp.staff,
     id: '09932',
   ),
   EmployeeModel(
@@ -141,7 +141,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '7.1K',
     sales: 11,
     rating: 4.3,
-    role: Role.cashier,
+    role: RoleEmp.cashier,
     id: '09933',
   ),
   EmployeeModel(
@@ -152,7 +152,7 @@ final employeeData = <EmployeeModel>[
     revenueValue: '4.6K',
     sales: 7,
     rating: 4.5,
-    role: Role.cashier,
+    role: RoleEmp.cashier,
     id: '09934',
   ),
 ];

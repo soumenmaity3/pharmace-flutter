@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pharmace/Backend/api_service.dart';
-import 'package:pharmace/Backend/model/Input/shop_owner_model.dart';
+import 'package:pharmace/Backend/model/Output/emp_invite.dart';
 import 'package:pharmace/Frontend/Widget/AddEmployee/role_widget.dart';
 import 'package:pharmace/Frontend/Widget/text_feild_widget.dart';
 import 'package:pharmace/Frontend/screens/other_screen/employee_qr_screen.dart';
 import 'package:pharmace/Frontend/theme/app_theme_extension.dart';
 import 'package:pharmace/Provider/owner_provider.dart';
 import 'package:pharmace/Provider/shop_provider.dart';
+
+import 'package:pharmace/Backend/model/Input/shop_owner_model.dart';
+import 'package:pharmace/Frontend/Employees/model/employee_model.dart';
 
 class AddEmployeesScreen extends ConsumerStatefulWidget {
   const AddEmployeesScreen({super.key, required this.isRequestForSelfEmployee});
@@ -25,7 +28,7 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
 
   bool _isSelfEmployee = false;
   bool _isLoading = false;
-  String selectedRole = 'Manager';
+  RoleEmp selectedRole = RoleEmp.manager;
   final ApiService apiService = ApiService();
 
   final List<String> roles = ['Manager', 'Pharmacist', 'Cashier', 'Staff'];
@@ -47,7 +50,7 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
         }
       } else if (_isSelfEmployee) {
         setState(() {
-          selectedRole = 'Manager';
+          selectedRole = RoleEmp.manager;
           if (owner != null) {
             _nameController.text = owner.name;
             _emailController.text = owner.email;
@@ -69,13 +72,13 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
     setState(() {
       _isSelfEmployee = !_isSelfEmployee;
       if (_isSelfEmployee) {
-        selectedRole = 'Manager';
+        selectedRole = RoleEmp.manager;
         if (owner != null) {
           _nameController.text = owner.name;
           _emailController.text = owner.email;
         }
       } else {
-        selectedRole = 'Cashier';
+        selectedRole = RoleEmp.cashier;
         _nameController.clear();
         _emailController.clear();
       }
@@ -299,12 +302,14 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
 
                       return RoleWidget(
                         title: role,
-                        isSelected: selectedRole == role,
+                        isSelected:
+                            selectedRole.name.toLowerCase() ==
+                            role.toLowerCase(),
                         isEnabled: !_isSelfEmployee,
                         onTap: () {
                           if (!_isSelfEmployee) {
                             setState(() {
-                              selectedRole = role;
+                              selectedRole = RoleEmp.fromString(role);
                             });
                           }
                         },
@@ -323,23 +328,23 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                           ? null
                           : () async {
                               if (_formKey.currentState?.validate() ?? false) {
-                                if (_isSelfEmployee) {
-                                  final shopId =
-                                      owner?.selectedShopId ??
-                                      ref.read(selectedShopProvider)?.id;
+                                final shopId =
+                                    // owner?.selectedShopId ??
+                                    ref.read(selectedShopProvider)?.id;
 
-                                  if (shopId == null || shopId.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'No shop selected. Please select a shop first.',
-                                        ),
-                                        behavior: SnackBarBehavior.floating,
+                                if (shopId == null || shopId.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'No shop selected. Please select a shop first.',
                                       ),
-                                    );
-                                    return;
-                                  }
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                  return;
+                                }
 
+                                if (_isSelfEmployee) {
                                   setState(() => _isLoading = true);
                                   final response = await apiService
                                       .markSelfEmployee(shopId);
@@ -390,12 +395,50 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                                     );
                                   }
                                 } else {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (builder) =>
-                                          const EmployeeQrScreen(),
-                                    ),
+                                  setState(() => _isLoading = true);
+                                  final inviteRequest = EmpInvite(
+                                    '',
+                                    shopId,
+                                    empEmail: _emailController.text.trim(),
+                                    empRole: selectedRole,
+                                    empName: _nameController.text.trim()
                                   );
+                                  final response = await apiService
+                                      .generateInviteCode(
+                                        shopId: shopId,
+                                        empInvite: inviteRequest,
+                                      );
+                                  setState(() => _isLoading = false);
+
+                                  if (!context.mounted) return;
+
+                                  if (response.statusCode >= 200 &&
+                                      response.statusCode < 300) {
+                                    final inviteData =
+                                        response.data ?? inviteRequest;
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (builder) =>
+                                            EmployeeQrScreen(inviteData),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          response.message ??
+                                              'Failed to generate invitation code (${response.statusCode})',
+                                        ),
+                                        backgroundColor: Colors.red.shade700,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 }
                               }
                             },

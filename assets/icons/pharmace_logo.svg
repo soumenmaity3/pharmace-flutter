@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" role="img" aria-labelledby="title desc">
+  <title id="title">Pharmace logo</title>
+  <desc id="desc">A pharmacy cross and connected inventory capsule mark beside the Pharmace wordmark.</desc>
+  <!-- Icon: clinical care plus operational flow -->
+  <g transform="translate(8 8)">
+    <rect width="124" height="124" rx="32" fill="#0E6B58"/>
+    <!-- Capsule / stock unit -->
+    <path d="M33 76.5a22 22 0 0 1 0-31.1l12.4-12.4a22 22 0 0 1 31.1 31.1L64.1 76.5A22 22 0 0 1 33 76.5Z" fill="#E5F1EE"/>
+    <path d="m40.8 84.2 38.8-38.8" fill="none" stroke="#2A8C78" stroke-width="10" stroke-linecap="round"/>
+    <!-- Precise care cross -->
+    <path d="M83 61h-9v-9a5 5 0 0 0-10 0v9h-9a5 5 0 0 0 0 10h9v9a5 5 0 0 0 10 0v-9h9a5 5 0 0 0 0-10Z" fill="#FFF"/>
+    <!-- Three operational nodes: store, stock, sale -->
+    <circle cx="30" cy="91" r="5" fill="#4FCB88"/>
+    <circle cx="52" cy="98" r="5" fill="#4FCB88"/>
+    <circle cx="74" cy="91" r="5" fill="#4FCB88"/>
+  </g>
+  <text x="158" y="79" fill="#171B1F" font-family="Manrope, Inter, Arial, sans-serif" font-size="58" font-weight="700" letter-spacing="-2">Pharmace</text>
+  <text x="161" y="107" fill="#5C6470" font-family="Manrope, Inter, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="2.5">PHARMACY OPERATIONS</text>
+</svg>

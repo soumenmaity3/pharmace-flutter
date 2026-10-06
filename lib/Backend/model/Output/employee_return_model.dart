@@ -7,7 +7,7 @@ class EmployeeReturnModel {
   final String? password;
   final String? role;
   final bool? isFromOwner;
-  final String? createdAt;
+    final String? createdAt;
   final ShopReturnModel? shop;
 
   const EmployeeReturnModel({

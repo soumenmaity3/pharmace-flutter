@@ -31,9 +31,9 @@ class _EmployeeNotifier extends StateNotifier<_EmployeeState> {
     final List<EmployeeTableData> employeesData = await db.employeeDao
         .getAllEmployees(currentShopId);
     final List<EmployeeModel> employees = employeesData.map((e) {
-      final role = Role.values.firstWhere(
+      final role = RoleEmp.values.firstWhere(
         (r) => r.name.toLowerCase() == e.role.toLowerCase(),
-        orElse: () => Role.staff,
+        orElse: () => RoleEmp.staff,
       );
 
       return EmployeeModel(
@@ -154,15 +154,15 @@ class _EmployeeNotifier extends StateNotifier<_EmployeeState> {
       return emp;
     }
     if (query == 'manager') {
-      return emp.where((item) => item.role == Role.manager).toList();
+      return emp.where((item) => item.role == RoleEmp.manager).toList();
     }
     if (query == 'cashier') {
-      return emp.where((item) => item.role == Role.cashier).toList();
+      return emp.where((item) => item.role == RoleEmp.cashier).toList();
     }
     if (query == 'pharmacist') {
-      return emp.where((item) => item.role == Role.pharmacist).toList();
+      return emp.where((item) => item.role == RoleEmp.pharmacist).toList();
     } else {
-      return emp.where((item) => item.role == Role.staff).toList();
+      return emp.where((item) => item.role == RoleEmp.staff).toList();
     }
   }
 }

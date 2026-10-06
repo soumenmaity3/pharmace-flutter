@@ -8,7 +8,7 @@ class EmployeeModel {
   final String revenueValue;
   final int sales;
   final double rating;
-  final Role role;
+  final RoleEmp role;
 
   EmployeeModel({
     required this.name,
@@ -30,7 +30,7 @@ class EmployeeModel {
     String? revenueValue,
     int? sales,
     double? rating,
-    Role? role,
+    RoleEmp? role,
   }) {
     return EmployeeModel(
       id: id ,
@@ -47,4 +47,33 @@ class EmployeeModel {
   }
 }
 
-enum Role { manager, pharmacist, cashier, staff }
+enum RoleEmp {
+  manager,
+  pharmacist,
+  cashier,
+  staff;
+
+  String get value {
+    switch (this) {
+      case RoleEmp.manager:
+        return 'Manager';
+      case RoleEmp.pharmacist:
+        return 'Pharmacist';
+      case RoleEmp.cashier:
+        return 'Cashier';
+      case RoleEmp.staff:
+        return 'Staff';
+    }
+  }
+
+  static RoleEmp fromString(String? role) {
+    if (role == null) return RoleEmp.staff;
+    return RoleEmp.values.firstWhere(
+      (r) =>
+          r.name.toLowerCase() == role.toLowerCase() ||
+          r.value.toLowerCase() == role.toLowerCase(),
+      orElse: () => RoleEmp.staff,
+    );
+  }
+}
+

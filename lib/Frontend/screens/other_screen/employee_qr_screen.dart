@@ -1,31 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pharmace/Backend/api_service.dart';
+import 'package:pharmace/Backend/model/Output/emp_invite.dart';
+import 'package:pharmace/Frontend/Employees/model/employee_model.dart';
 import 'package:pharmace/Frontend/Widget/AddEmployee/qr_code_widget.dart';
 import 'package:pharmace/Frontend/theme/app_colors.dart';
+import 'package:pharmace/Provider/shop_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
-class EmployeeQrScreen extends StatefulWidget {
-  const EmployeeQrScreen({super.key});
+class EmployeeQrScreen extends ConsumerStatefulWidget {
+  const EmployeeQrScreen(this.inviteDetails, {super.key});
+  final EmpInvite inviteDetails;
 
   @override
-  State<EmployeeQrScreen> createState() => _EmployeeQrScreenState();
+  ConsumerState<EmployeeQrScreen> createState() => _EmployeeQrScreenState();
 }
 
-class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
-  // Change these values from your API/backend.
-  final String employeeRole = 'Cashier';
-  final String pharmacyName = 'Sengupta Medical Hall';
+class _EmployeeQrScreenState extends ConsumerState<EmployeeQrScreen> {
+  late EmpInvite _currentInvite;
+  bool _isRegenerating = false;
 
-  final String inviteCode = 'PHR-82X9-K4';
+  @override
+  void initState() {
+    super.initState();
+    _currentInvite = widget.inviteDetails;
+  }
 
-  // IMPORTANT:
-  // This is the actual data encoded inside the QR.
-  //
-  // Ideally use your invitation URL or invitation ID here.
-  final String qrData = 'PHR-82X9-K4';
+  String _getRoleName(RoleEmp role) {
+    switch (role) {
+      case RoleEmp.manager:
+        return 'Manager';
+      case RoleEmp.pharmacist:
+        return 'Pharmacist';
+      case RoleEmp.cashier:
+        return 'Cashier';
+      case RoleEmp.staff:
+        return 'Staff';
+    }
+  }
 
   Future<void> _copyCode() async {
-    await Clipboard.setData(ClipboardData(text: inviteCode));
+    final code = _currentInvite.inviteId;
+    if (code.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: code));
 
     if (!mounted) return;
 
@@ -37,16 +57,93 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
     );
   }
 
+  Future<void> _shareInvitation(
+    String pharmacyName,
+    String employeeRole,
+  ) async {
+    final code = _currentInvite.inviteId;
+    final message =
+        'You are invited to join $pharmacyName as $employeeRole.\n\n'
+        'Download the Pharmase Employee app and use invitation code: $code or scan the QR code to join.';
+    try {
+      await SharePlus.instance.share(ShareParams(text: message));
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: message));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invitation details copied to clipboard'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _regenerateCode() async {
+    if (_isRegenerating) return;
+
+    final shopId = _currentInvite.shopId.isNotEmpty
+        ? _currentInvite.shopId
+        : (ref.read(selectedShopProvider)?.id ?? '');
+
+    if (shopId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Shop ID not found')),
+      );
+      return;
+    }
+
+    setState(() => _isRegenerating = true);
+
+    final response = await ApiService().generateInviteCode(
+      shopId: shopId,
+      empInvite: _currentInvite,
+    );
+
+    setState(() => _isRegenerating = false);
+
+    if (!mounted) return;
+
+    if (response.statusCode >= 200 &&
+        response.statusCode < 300 &&
+        response.data != null) {
+      setState(() {
+        _currentInvite = response.data!;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('New invitation code generated successfully'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            response.message ??
+                'Failed to regenerate code (${response.statusCode})',
+          ),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final selectedShop = ref.watch(selectedShopProvider);
+    final pharmacyName = selectedShop?.shopName ?? 'Pharmacy';
+    final employeeRole = _getRoleName(_currentInvite.empRole);
+    final inviteCode = _currentInvite.inviteId;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Invite employee')),
+      appBar: AppBar(title: const Text('Invite employee')),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: constraints.maxHeight - 48,
@@ -57,7 +154,7 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                     // SECURE INVITATION
                     // ------------------------------------------------
                     Container(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 5,
                       ),
@@ -68,12 +165,12 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.verified_user_outlined,
                             size: 14,
                             color: AppColors.primary,
                           ),
-                          SizedBox(width: 5),
+                          const SizedBox(width: 5),
                           Text(
                             'Secure invitation',
                             style: TextStyle(
@@ -86,7 +183,7 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                       ),
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // ------------------------------------------------
                     // TITLE
@@ -97,7 +194,7 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                       style: theme.textTheme.titleLarge,
                     ),
 
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
                     // ------------------------------------------------
                     // SUBTITLE
@@ -105,20 +202,17 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                     RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           color: AppColors.lightTextSecondary,
                         ),
                         children: [
                           const TextSpan(text: 'as '),
-
                           TextSpan(
                             text: employeeRole,
                             style: theme.textTheme.titleMedium,
                           ),
-
-                          TextSpan(text: ' at '),
-
+                          const TextSpan(text: ' at '),
                           TextSpan(
                             text: pharmacyName,
                             style: theme.textTheme.labelLarge,
@@ -127,14 +221,14 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                       ),
                     ),
 
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
 
                     // ------------------------------------------------
                     // MAIN CARD
                     // ------------------------------------------------
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(30, 30, 30, 26),
+                      padding: const EdgeInsets.fromLTRB(30, 30, 30, 26),
                       decoration: BoxDecoration(
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(20),
@@ -154,29 +248,35 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                             ),
                           ),
 
-                          SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
                           // ------------------------------------------
                           // QR
                           // ------------------------------------------
-                          QrCodeWidget(data: qrData, size: 220),
+                          QrCodeWidget(
+                            data: inviteCode.isNotEmpty
+                                ? inviteCode
+                                : 'No Invite Code',
+                            size: 220,
+                          ),
 
-                          SizedBox(height: 26),
+                          const SizedBox(height: 26),
 
                           // ------------------------------------------
                           // DIVIDER + OR ENTER CODE
                           // ------------------------------------------
                           Row(
                             children: [
-                              Expanded(
+                              const Expanded(
                                 child: Divider(
                                   color: AppColors.darkDivider,
                                   thickness: 1,
                                 ),
                               ),
-
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
                                 child: Text(
                                   'OR ENTER CODE',
                                   style: theme.textTheme.titleSmall?.copyWith(
@@ -185,8 +285,7 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                                   ),
                                 ),
                               ),
-
-                              Expanded(
+                              const Expanded(
                                 child: Divider(
                                   color: AppColors.darkDivider,
                                   thickness: 1,
@@ -194,7 +293,7 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
 
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -215,7 +314,7 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                             ],
                           ),
 
-                          SizedBox(height: 22),
+                          const SizedBox(height: 22),
 
                           // ------------------------------------------
                           // INVITE CODE
@@ -223,7 +322,7 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                           Container(
                             width: double.infinity,
                             height: 60,
-                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
                             decoration: BoxDecoration(
                               color: theme.focusColor,
                               borderRadius: BorderRadius.circular(14),
@@ -232,21 +331,26 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    inviteCode,
+                                    inviteCode.isNotEmpty
+                                        ? inviteCode
+                                        : '--------',
                                     style: theme.textTheme.headlineMedium
                                         ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                 ),
-
                                 TextButton.icon(
-                                  onPressed: _copyCode,
+                                  onPressed:
+                                      inviteCode.isNotEmpty ? _copyCode : null,
                                   style: TextButton.styleFrom(
                                     foregroundColor: AppColors.primary,
-                                    padding: EdgeInsets.symmetric(
+                                    padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                     ),
                                   ),
-                                  icon: Icon(Icons.copy_outlined, size: 18),
+                                  icon: const Icon(
+                                    Icons.copy_outlined,
+                                    size: 18,
+                                  ),
                                   label: Text(
                                     'Copy',
                                     style: theme.textTheme.labelLarge?.copyWith(
@@ -263,29 +367,27 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                       ),
                     ),
 
-                    SizedBox(height: 26),
+                    const SizedBox(height: 26),
 
                     // ------------------------------------------------
                     // BOTTOM INSTRUCTION
                     // ------------------------------------------------
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Text.rich(
                         TextSpan(
                           style: theme.textTheme.labelLarge?.copyWith(
                             fontSize: 14,
                             height: 1.55,
                           ),
-                          // fontSize: 14,
-                          // height: 1.55,
                           children: [
                             TextSpan(
-                              text: 'Ask New to open the ',
+                              text: 'Ask employee to open the ',
                               style: theme.textTheme.titleSmall?.copyWith(
                                 color: AppColors.darkTextTertiary,
                               ),
                             ),
-                            TextSpan(
+                            const TextSpan(
                               text: 'Pharmase Employee',
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
@@ -305,19 +407,22 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                       ),
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
                       height: 52,
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          // Share invitation
-                        },
+                        onPressed: inviteCode.isNotEmpty
+                            ? () => _shareInvitation(
+                                pharmacyName,
+                                employeeRole,
+                              )
+                            : null,
                         icon: SvgPicture.asset(
                           'assets/icons/share.svg',
                           width: 16,
                           height: 16,
-                          colorFilter: ColorFilter.mode(
+                          colorFilter: const ColorFilter.mode(
                             AppColors.goldLight,
                             BlendMode.srcIn,
                           ),
@@ -339,24 +444,32 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 15),
+                    const SizedBox(height: 15),
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          // Regenerate code
-                        },
-                        icon: Icon(Icons.refresh, size: 20),
+                        onPressed: _isRegenerating ? null : _regenerateCode,
+                        icon: _isRegenerating
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.refresh, size: 20),
                         label: Text(
-                          'Regenerate code',
+                          _isRegenerating
+                              ? 'Regenerating...'
+                              : 'Regenerate code',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
                           backgroundColor: theme.cardColor,
-                          side: BorderSide(
+                          side: const BorderSide(
                             color: AppColors.darkBorder,
                             width: 1,
                           ),
@@ -367,9 +480,12 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    TextButton(onPressed: () {}, child: Text('Done')),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Done'),
+                    ),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
@@ -380,3 +496,4 @@ class _EmployeeQrScreenState extends State<EmployeeQrScreen> {
     );
   }
 }
+

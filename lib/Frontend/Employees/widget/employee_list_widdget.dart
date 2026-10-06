@@ -27,13 +27,13 @@ class EmployeeListWidget extends ConsumerWidget {
     final String role;
     final Color roleColor;
 
-    if (employeeItem.role == Role.pharmacist) {
+    if (employeeItem.role == RoleEmp.pharmacist) {
       role = 'Pharmacist';
       roleColor = AppColors.pharmacistForeground;
-    } else if (employeeItem.role == Role.manager) {
+    } else if (employeeItem.role == RoleEmp.manager) {
       role = 'Manager';
       roleColor = AppColors.managerForeground;
-    } else if (employeeItem.role == Role.cashier) {
+    } else if (employeeItem.role == RoleEmp.cashier) {
       role = 'Cashier';
       roleColor = AppColors.cashierForeground;
     } else {
