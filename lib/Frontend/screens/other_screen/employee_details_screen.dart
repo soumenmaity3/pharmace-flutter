@@ -528,16 +528,17 @@ class _EmployeeDetailsScreenState extends ConsumerState<EmployeeDetailsScreen> {
                 const SizedBox(width: 4),
                 ElevatedButton.icon(
                   onPressed: () {
-                    final shopId = ref.read(selectedShopProvider)?.id ?? '';
+                    final shop = ref.read(selectedShopProvider);
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => EmployeeQrScreen(
                           EmpInvite(
                             inviteCode,
-                            shopId,
+                            shop!.id,
                             empEmail: currentEmployee.email,
                             empRole: currentEmployee.role,
-                            empName: currentEmployee.name
+                            empName: currentEmployee.name,
+                            ownerId: shop.ownerId!
                           ),
                         ),
                       ),

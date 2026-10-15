@@ -25,6 +25,8 @@ import 'package:pharmace/Provider/employee_provider.dart';
 import 'package:pharmace/Provider/shop_provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'package:pharmace/Provider/app_view_provider.dart';
+
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -47,20 +49,19 @@ void main() async {
       await windowManager.focus();
     });
   }
-  runApp(ProviderScope(child: PharmaseApp()));
+  runApp(ProviderScope(child: PharmaceApp()));
 }
 
-class PharmaseApp extends ConsumerStatefulWidget {
-  const PharmaseApp({super.key});
+class PharmaceApp extends ConsumerStatefulWidget {
+  const PharmaceApp({super.key});
 
   @override
-  ConsumerState<PharmaseApp> createState() => _PharmaseAppState();
+  ConsumerState<PharmaceApp> createState() => _PharmaceAppState();
 }
 
-class _PharmaseAppState extends ConsumerState<PharmaseApp> {
+class _PharmaceAppState extends ConsumerState<PharmaceApp> {
   int _selectedIndex = 0;
   final ApiService _apiService = ApiService();
-  _AppView _view = _AppView.splash;
   static Future<bool> _isTokenExpired() async {
     final token = await SecureStorageService.getToken();
 
@@ -81,6 +82,7 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
     await db.billDao.deleteAllData();
     await db.inventoryMedicineDao.deleteAllData();
     await db.shopDao.deleteAllData();
+    await db.employeeDao.deleteAll();
     await SecureStorageService.deleteToken();
   }
 
@@ -90,7 +92,7 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      title: 'Pharmase',
+      title: 'Pharmace',
 
       theme: AppTheme.lightTheme,
 
@@ -102,8 +104,8 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
 
       home: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),
-        child: switch (_view) {
-          _AppView.splash => SplashScreen(
+        child: switch (ref.watch(appViewProvider)) {
+          AppView.splash => SplashScreen(
             key: const ValueKey('splash'),
             onFinished: () async {
               final isExpired = await _isTokenExpired();
@@ -112,8 +114,8 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
                 if (!mounted) return;
                 setState(() {
                   _selectedIndex = 0;
-                  _view = _AppView.login;
                 });
+                ref.read(appViewProvider.notifier).state = AppView.login;
                 return;
               }
 
@@ -134,22 +136,23 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
 
               setState(() {
                 _selectedIndex = 0;
-
-                if (isHaveThisOwner) {
-                  _view = haveShop ? _AppView.dashboard : _AppView.addScreen;
-                } else {
-                  _view = _AppView.login;
-                }
               });
+
+              if (isHaveThisOwner) {
+                ref.read(appViewProvider.notifier).state =
+                    haveShop ? AppView.dashboard : AppView.addScreen;
+              } else {
+                ref.read(appViewProvider.notifier).state = AppView.login;
+              }
             },
           ),
-          _AppView.addScreen => AddShopScreen(
+          AppView.addScreen => AddShopScreen(
             key: const ValueKey('addScreen'),
             onCompleted: () {
-              setState(() => _view = _AppView.dashboard);
+              ref.read(appViewProvider.notifier).state = AppView.login;
             },
           ),
-          _AppView.login => LoginScreen(
+          AppView.login => LoginScreen(
             key: ValueKey('login'),
             onLogin: () async {
               ref.invalidate(ownerProvider);
@@ -158,11 +161,12 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
               ref.invalidate(salesProvider);
               ref.invalidate(recentSalesProvider);
               ref.invalidate(employeeProvider);
-              setState(() => _view = _AppView.dashboard);
+              ref.read(appViewProvider.notifier).state = AppView.dashboard;
             },
-            onCreateAccount: () => setState(() => _view = _AppView.signup),
+            onCreateAccount: () =>
+                ref.read(appViewProvider.notifier).state = AppView.signup,
           ),
-          _AppView.signup => SignupScreen(
+          AppView.signup => SignupScreen(
             key: ValueKey('signup'),
             onSignup: () async {
               ref.invalidate(ownerProvider);
@@ -171,11 +175,12 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
               ref.invalidate(salesProvider);
               ref.invalidate(recentSalesProvider);
               ref.invalidate(employeeProvider);
-              setState(() => _view = _AppView.dashboard);
+              ref.read(appViewProvider.notifier).state = AppView.dashboard;
             },
-            onSignIn: () => setState(() => _view = _AppView.login),
+            onSignIn: () =>
+                ref.read(appViewProvider.notifier).state = AppView.login,
           ),
-          _AppView.dashboard =>
+          AppView.dashboard =>
             deviceType == DeviceType.mobile
                 ? _buildMainScaffold()
                 : Container(decoration: BoxDecoration(color: Colors.red)),
@@ -214,8 +219,8 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
             if (!mounted) return;
             setState(() {
               _selectedIndex = 0;
-              _view = _AppView.login;
             });
+            ref.read(appViewProvider.notifier).state = AppView.login;
           },
         ),
       ][_selectedIndex],
@@ -308,4 +313,4 @@ class _PharmaseAppState extends ConsumerState<PharmaseApp> {
   }
 }
 
-enum _AppView { splash, login, signup, dashboard, addScreen }
+

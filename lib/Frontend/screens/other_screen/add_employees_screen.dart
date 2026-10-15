@@ -328,11 +328,9 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                           ? null
                           : () async {
                               if (_formKey.currentState?.validate() ?? false) {
-                                final shopId =
-                                    // owner?.selectedShopId ??
-                                    ref.read(selectedShopProvider)?.id;
+                                final shop = ref.read(selectedShopProvider);
 
-                                if (shopId == null || shopId.isEmpty) {
+                                if (shop == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
@@ -347,7 +345,7 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                                 if (_isSelfEmployee) {
                                   setState(() => _isLoading = true);
                                   final response = await apiService
-                                      .markSelfEmployee(shopId);
+                                      .markSelfEmployee(shop.id);
                                   setState(() => _isLoading = false);
 
                                   if (response.statusCode >= 200 &&
@@ -355,7 +353,7 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                                     await ref
                                         .read(shopProvider.notifier)
                                         .updateOwnerEmployeeStatus(
-                                          shopId,
+                                          shop.id,
                                           true,
                                         );
                                     if (!context.mounted) return;
@@ -398,14 +396,15 @@ class _AddEmployeesScreenState extends ConsumerState<AddEmployeesScreen> {
                                   setState(() => _isLoading = true);
                                   final inviteRequest = EmpInvite(
                                     '',
-                                    shopId,
+                                    shop.id,
                                     empEmail: _emailController.text.trim(),
                                     empRole: selectedRole,
-                                    empName: _nameController.text.trim()
+                                    empName: _nameController.text.trim(),
+                                    ownerId: shop.ownerId!
                                   );
                                   final response = await apiService
                                       .generateInviteCode(
-                                        shopId: shopId,
+                                        shopId: shop.id,
                                         empInvite: inviteRequest,
                                       );
                                   setState(() => _isLoading = false);

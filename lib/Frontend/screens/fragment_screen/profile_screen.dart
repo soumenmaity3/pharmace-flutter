@@ -7,6 +7,7 @@ import 'package:pharmace/Frontend/Profile/widget/edit_shop_details_bottom_sheet_
 import 'package:pharmace/Frontend/screens/auth_screens/add_shop_screen.dart';
 import 'package:pharmace/Frontend/theme/app_theme_extension.dart';
 import 'package:pharmace/Provider/shop_provider.dart';
+import 'package:pharmace/Provider/app_view_provider.dart';
 
 import 'package:pharmace/Frontend/Profile/screens/notification_screen.dart';
 
@@ -34,7 +35,7 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Shop Profile', style: theme.textTheme.titleLarge),
-        actions: [_threeDotActionButton(context)],
+        actions: [_threeDotActionButton(context, ref)],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -84,14 +85,22 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  PopupMenuButton<String> _threeDotActionButton(BuildContext context) {
+  PopupMenuButton<String> _threeDotActionButton(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert),
       onSelected: (value) async {
         if (value == 'addShop') {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (context) => AddShopScreen()));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (shopCtx) => AddShopScreen(
+                onCompleted: () async {
+                  Navigator.of(shopCtx).popUntil((route) => route.isFirst);
+                  await SecureStorageService.deleteToken();
+                  ref.read(appViewProvider.notifier).state = AppView.login;
+                },
+              ),
+            ),
+          );
         } else if (value == 'logout') {
           await SecureStorageService.deleteToken();
           onLogout();

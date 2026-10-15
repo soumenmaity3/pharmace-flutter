@@ -11,6 +11,7 @@ import 'package:pharmace/Frontend/theme/app_theme_extension.dart';
 import 'package:pharmace/Backend/auth/secure_storage_service.dart';
 import 'package:pharmace/LocalDB/database.dart';
 import 'package:pharmace/Provider/database_provider.dart';
+import 'package:pharmace/Provider/app_view_provider.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({
@@ -85,8 +86,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           MaterialPageRoute(
             builder: (shopContext) => AddShopScreen(
               onCompleted: () {
-                Navigator.of(shopContext).pop();
-                widget.onSignup();
+                Navigator.of(shopContext).popUntil((route) => route.isFirst);
+                ref.read(appViewProvider.notifier).state = AppView.login;
               },
             ),
           ),

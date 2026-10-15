@@ -8,6 +8,7 @@ import 'package:pharmace/Frontend/theme/app_colors.dart';
 import 'package:pharmace/Frontend/theme/app_theme_extension.dart';
 import 'package:pharmace/LocalDB/database.dart';
 import 'package:pharmace/Provider/database_provider.dart';
+import 'package:pharmace/Provider/app_view_provider.dart';
 
 class AddShopScreen extends ConsumerStatefulWidget {
   const AddShopScreen({super.key, this.onCompleted});
@@ -44,8 +45,9 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
   Future<void> _captureLiveLocation() async {
     // 1. Request in-app permission dialog if not granted yet (in-app, not settings)
     if (!_hasInAppLocationPermission) {
-      final granted =
-          await LocationService.instance.requestInAppPermission(context);
+      final granted = await LocationService.instance.requestInAppPermission(
+        context,
+      );
       if (!granted) {
         return;
       }
@@ -55,8 +57,8 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
     setState(() => _isCapturingLocation = true);
 
     try {
-      final locData =
-          await LocationService.instance.getCurrentLocationAddress();
+      final locData = await LocationService.instance
+          .getCurrentLocationAddress();
 
       if (!mounted) return;
 
@@ -71,8 +73,8 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
           _capturedAddressHint = addr.isNotEmpty
               ? '$addr, $city'
               : (_addressController.text.trim().isNotEmpty
-                  ? _addressController.text.trim()
-                  : 'Location detected');
+                    ? _addressController.text.trim()
+                    : 'Location detected');
 
           // Fill all location fields
           if (locData.address.isNotEmpty) {
@@ -177,7 +179,24 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
           ..showSnackBar(
             const SnackBar(content: Text('Shop added successfully')),
           );
-        widget.onCompleted?.call();
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => _ShopCreatedSuccessDialog(
+            shopName: _shopNameController.text.trim(),
+            onLoginPressed: () {
+              Navigator.of(dialogContext).pop();
+              if (widget.onCompleted != null) {
+                widget.onCompleted!();
+              } else {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
+                ref.read(appViewProvider.notifier).state = AppView.login;
+              }
+            },
+          ),
+        );
 
         return;
       }
@@ -372,7 +391,7 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
                 ),
                 if (isLastStep)
                   TextButton(
-                    onPressed:  () async {
+                    onPressed: () async {
                       _continue(ref.watch(databaseProvider));
                     },
                     child: const Text('Skip for now'),
@@ -401,9 +420,7 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
                 : theme.cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _isLocationCaptured
-                  ? AppColors.primary
-                  : appColors.border,
+              color: _isLocationCaptured ? AppColors.primary : appColors.border,
               width: _isLocationCaptured ? 1.5 : 1,
             ),
             boxShadow: [
@@ -427,21 +444,21 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
                       color: _isLocationCaptured
                           ? AppColors.primary.withValues(alpha: 0.12)
                           : (_isCapturingLocation
-                              ? AppColors.warning.withValues(alpha: 0.12)
-                              : AppColors.primary.withValues(alpha: 0.1)),
+                                ? AppColors.warning.withValues(alpha: 0.12)
+                                : AppColors.primary.withValues(alpha: 0.1)),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       _isLocationCaptured
                           ? Icons.location_on_rounded
                           : (_isCapturingLocation
-                              ? Icons.radar_rounded
-                              : Icons.my_location_rounded),
+                                ? Icons.radar_rounded
+                                : Icons.my_location_rounded),
                       color: _isLocationCaptured
                           ? AppColors.primary
                           : (_isCapturingLocation
-                              ? AppColors.warning
-                              : AppColors.primary),
+                                ? AppColors.warning
+                                : AppColors.primary),
                       size: 24,
                     ),
                   ),
@@ -468,7 +485,9 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.successDark.withValues(alpha: 0.15),
+                                  color: AppColors.successDark.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Row(
@@ -496,7 +515,8 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
                         const SizedBox(height: 4),
                         Text(
                           _isLocationCaptured
-                              ? (_capturedAddressHint ?? 'Coordinates pinned to store address')
+                              ? (_capturedAddressHint ??
+                                    'Coordinates pinned to store address')
                               : 'Pin your pharmacy’s live GPS coordinates for licensing verification and nearby customer searches.',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: appColors.textSecondary,
@@ -512,14 +532,14 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
               if (_isLocationCaptured && _capturedCoordinates != null) ...[
                 const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.cardColor,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: appColors.border,
-                      width: 0.8,
-                    ),
+                    border: Border.all(color: appColors.border, width: 0.8),
                   ),
                   child: Row(
                     children: [
@@ -541,7 +561,10 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(6),
@@ -568,7 +591,9 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
                 height: 44,
                 child: _isLocationCaptured
                     ? OutlinedButton.icon(
-                        onPressed: _isCapturingLocation ? null : _captureLiveLocation,
+                        onPressed: _isCapturingLocation
+                            ? null
+                            : _captureLiveLocation,
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(
                             color: AppColors.primary.withValues(alpha: 0.6),
@@ -581,7 +606,9 @@ class _AddShopScreenState extends ConsumerState<AddShopScreen> {
                         label: const Text('Re-capture Location'),
                       )
                     : ElevatedButton.icon(
-                        onPressed: _isCapturingLocation ? null : _captureLiveLocation,
+                        onPressed: _isCapturingLocation
+                            ? null
+                            : _captureLiveLocation,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -707,4 +734,265 @@ class _ShopStep {
 
   final String title;
   final String subtitle;
+}
+
+class _ShopCreatedSuccessDialog extends StatelessWidget {
+  const _ShopCreatedSuccessDialog({
+    required this.shopName,
+    required this.onLoginPressed,
+  });
+
+  final String shopName;
+  final VoidCallback onLoginPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final surfaceColor = isDark
+        ? AppColors.darkSurface
+        : AppColors.lightSurface;
+    final cardColor = isDark
+        ? AppColors.darkSurfaceVariant
+        : AppColors.lightSurfaceVariant;
+    final borderColor = isDark
+        ? AppColors.darkBorder
+        : AppColors.lightBorder;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
+
+    return Dialog(
+      backgroundColor: surfaceColor,
+      surfaceTintColor: Colors.transparent,
+      elevation: 6,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+        side: BorderSide(color: borderColor, width: 1),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Visual badge with icon and checkmark
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.primaryDark.withValues(alpha: 0.35)
+                          : AppColors.primaryContainer,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.25),
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.storefront_rounded,
+                      color: AppColors.primary,
+                      size: 36,
+                    ),
+                  ),
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(2.5),
+                      decoration: BoxDecoration(
+                        color: surfaceColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: AppColors.success,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Title
+              Text(
+                'Shop Added Successfully!',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Description
+              Text(
+                shopName.isNotEmpty
+                    ? '$shopName has been created. Please log in to complete setup and sync all store records.'
+                    : 'Your shop has been created. Please log in to complete setup and sync all store records.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: textSecondary,
+                  height: 1.45,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Explanatory Info Card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Column(
+                  children: [
+                    _FeatureRow(
+                      icon: Icons.sync_rounded,
+                      title: 'Data Synchronization',
+                      description: 'Downloads your products, categories & catalog settings.',
+                      isDark: isDark,
+                      theme: theme,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: borderColor,
+                      ),
+                    ),
+                    _FeatureRow(
+                      icon: Icons.security_rounded,
+                      title: 'Account Authentication',
+                      description: 'Establishes a secure session for billing & inventory.',
+                      isDark: isDark,
+                      theme: theme,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Action button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onLoginPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Proceed to Login',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_rounded, size: 18),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FeatureRow extends StatelessWidget {
+  const _FeatureRow({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.isDark,
+    required this.theme,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final bool isDark;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 2),
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.primaryDark.withValues(alpha: 0.3)
+                : AppColors.primaryContainer,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppColors.primary, size: 15),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: textSecondary,
+                  fontSize: 12,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }

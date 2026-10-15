@@ -7,12 +7,13 @@ class EmpInvite {
 
   final RoleEmp empRole;
   final String shopId;
+  final String ownerId;
 
   EmpInvite(this.inviteId,
       this.shopId, {
         required this.empEmail,
         required this.empName,
-        required this.empRole,
+        required this.empRole, required this.ownerId,
       });
 
   Map<String, dynamic> toJson() {
@@ -21,7 +22,8 @@ class EmpInvite {
       'empEmail': empEmail,
       'empRole': empRole.value,
       'shopId': shopId,
-      'empName':empName
+      'empName':empName,
+      'ownerId':ownerId
     };
   }
 
@@ -31,7 +33,8 @@ class EmpInvite {
       json['shopId']?.toString() ?? '',
       empEmail: json['empEmail']?.toString() ?? '',
       empRole: RoleEmp.fromString(json['empRole']?.toString()),
-      empName: json['empName']?.toString()??''
+      empName: json['empName']?.toString()??'',
+      ownerId: json['ownerId']?.toString()??''
     );
   }
 }

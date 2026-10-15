@@ -39,4 +39,8 @@ class EmployeeDao extends DatabaseAccessor<AppDatabase>
       });
     });
   }
+
+  Future<void> deleteAll() async {
+    delete(employeeTable).go();
+  }
 }

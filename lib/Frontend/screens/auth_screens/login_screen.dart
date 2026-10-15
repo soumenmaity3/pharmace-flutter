@@ -10,6 +10,7 @@ import 'package:pharmace/Frontend/theme/app_colors.dart';
 import 'package:pharmace/Frontend/theme/app_theme_extension.dart';
 import 'package:pharmace/LocalDB/database.dart';
 import 'package:pharmace/Provider/database_provider.dart';
+import 'package:pharmace/Provider/app_view_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({
@@ -96,13 +97,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             MaterialPageRoute(
               builder: (shopContext) => AddShopScreen(
                 onCompleted: () {
-                  Navigator.of(shopContext).pop();
+                  Navigator.of(shopContext).popUntil((route) => route.isFirst);
+                  ref.read(appViewProvider.notifier).state = AppView.login;
                 },
               ),
             ),
           );
-          if (!mounted) return;
-          widget.onLogin();
           return;
         }
 
