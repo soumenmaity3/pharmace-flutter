@@ -1,7 +1,7 @@
 # 💊 Pharmace — Intelligent Pharmacy Management & POS System
 
 <p align="center">
-  <img src="assets/icons/logo.png" alt="Pharmace Logo" width="120" onerror="this.style.display='none'"/>
+  <img src="assets/images/app_logo.jpg" alt="Pharmace Logo" width="160"/>
 </p>
 
 <p align="center">
@@ -225,8 +225,8 @@ pharmace/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/pharmace.git
-cd pharmace
+git clone https://github.com/soumenmaity3/pharmace-flutter.git
+cd pharmace-flutter
 ```
 
 ### 2. Install Dependencies
